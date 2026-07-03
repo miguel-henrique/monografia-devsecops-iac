@@ -1,0 +1,129 @@
+\chapter{Materiais e Metodologia}
+
+A presente pesquisa caracteriza-se como uma \textbf{pesquisa aplicada}, com \textbf{abordagem mista} (qualitativa e quantitativa) e \textbf{objetivos descritivos e exploratórios}~\citeonline{gil2019metodos}. O método adotado é o de \textbf{estudo de caso}~\citeonline{yin2018case}, com unidade de análise única -- o próprio modelo de integração DevSecOps + IaC proposto pelo autor -- validado em duas Provas de Conceito (PoC) desenvolvidas para este trabalho.
+
+\section{Classificação da Pesquisa}
+
+Quanto à natureza, a pesquisa é aplicada, pois busca gerar conhecimento com aplicação prática na solução de problemas específicos de segurança em infraestrutura. Quanto aos objetivos, é descritiva e exploratória, pois estabelece relações entre ferramentas de automação, controles de conformidade e resultados observáveis. A abordagem quantitativa foi empregada na coleta de métricas de desempenho e de eficácia da esteira automatizada (por exemplo, número de falhas detectadas, tempo de execução da esteira, número de \textit{gates} interrompidos), enquanto a abordagem qualitativa se manifesta na análise crítica dos resultados e na discussão comparativa entre os dois ambientes.
+
+O método é o de estudo de caso técnico~\citeonline{yin2018case}, com \textbf{proposição prévia} (o modelo de integração), \textbf{unidade de análise} (o modelo em execução), \textbf{múltiplas fontes de evidência} (código-fonte das PoC, saídas de ferramentas, \textit{logs} de \textit{pipeline}, \textit{outputs} do console AWS) e \textbf{critérios explícitos de sucesso} (definidos como métricas na Seção~\ref{sec:metricas}). Trata-se de um estudo de caso instrumental: as duas PoC servem como instrumentos para investigar o modelo, e não como fim em si mesmas.
+
+\section{Etapas do Procedimento Metodológico}
+
+A execução do trabalho foi estruturada nas seguintes etapas:
+
+\begin{enumerate}
+    \item \textbf{Revisão bibliográfica:} levantamento sistemático da literatura sobre o estado da arte de DevSecOps, IaC, análise estática de configurações (SAST-IaC) e Policy-as-Code. Foram consultados repositórios acadêmicos, revisões sistemáticas (por exemplo, \citeonline{myrbakken2017devsecops, sanchez2020devsecops, rahman2019survey}), documentações oficiais de provedores de nuvem (AWS)~\citeonline{AWS2026} e \textit{frameworks} de mercado (CIS Benchmarks~\citeonline{CIS2024AWS, CISKubernetes2024}, NIST SP 800-190~\citeonline{nist800190}, NIST SP 800-218~\citeonline{nist800218}).
+
+    \item \textbf{Definição do cenário e seleção de ferramentas:} identificação dos recursos críticos de infraestrutura (VPC, EKS, RDS, S3, IAM, KMS) e seleção do \textit{stack} tecnológico capaz de suportar a automação de segurança em duas topologias -- nuvem pública e local.
+
+    \item \textbf{Proposta do modelo:} elaboração do modelo conceitual de integração DevSecOps + IaC, contemplando as etapas \textit{Source}, \textit{Build}, \textit{Test}, \textit{Deploy} e \textit{Operate}, e a distribuição das ferramentas em cada etapa.
+
+    \item \textbf{Desenvolvimento das duas Provas de Conceito:}
+    \begin{itemize}
+        \item \textbf{PoC AWS}~\citeonline{PocDevSecOpsAWS2026}: construção da infraestrutura em nuvem pública utilizando Terraform, com múltiplos módulos (\texttt{networking}, \texttt{security}, \texttt{iam}, \texttt{kms}, \texttt{storage}, \texttt{database}, \texttt{eks}, \texttt{ecr}, \texttt{observability}, \texttt{governance}). A esteira de CI/CD foi implementada em GitHub Actions com autenticação federada via OIDC, e as políticas de segurança foram configuradas em Checkov e OPA/Rego.
+        \item \textbf{PoC Contêineres}~\citeonline{PocDevSecOps2026}: espelhamento da mesma topologia lógica em ambiente local, utilizando Docker (VPC $\rightarrow$ \texttt{docker\_network}; RDS $\rightarrow$ contêiner PostgreSQL; EKS $\rightarrow$ réplicas FastAPI; ALB $\rightarrow$ contêiner NGINX) e Terraform como orquestrador declarativo. A pipeline GitHub Actions executa Checkov no HCL e nos \textit{Dockerfiles}.
+    \end{itemize}
+
+    \item \textbf{Execução dos testes controlados:} submissão do código a testes com configurações \textit{deliberada e comprovadamente} inseguras (Seção~\ref{sec:testes-controlados}), com o objetivo de validar a capacidade da esteira em detectar cada falha antes do provisionamento.
+
+    \item \textbf{Coleta e análise de dados:} registro dos artefatos gerados pelas ferramentas (relatórios do Checkov em CLI e SARIF, saída do OPA/Conftest, \textit{logs} de \textit{pipeline}, \textit{screenshots} do console AWS) e análise das métricas definidas.
+\end{enumerate}
+
+\section{Materiais e Ecossistema Tecnológico}
+
+Para a viabilização dos testes práticos e a validação do modelo, utilizou-se o seguinte conjunto de recursos:
+
+\begin{itemize}
+    \item \textbf{Ambiente de desenvolvimento:} estação de trabalho com sistema operacional Linux (Ubuntu 22.04, WSL2) e \textit{Integrated Development Environment} (IDE) VS~Code.
+    \item \textbf{Provedor de nuvem:} Amazon Web Services (AWS)~\citeonline{AWS2026} como ambiente de destino da PoC de nuvem pública, com recursos provisionados em região \texttt{us-east-1} e/ou \texttt{sa-east-1}, conforme o cenário.
+    \item \textbf{Ambiente local:} Docker Engine e Docker Compose, para a PoC baseada em contêineres.
+    \item \textbf{IaC:} Terraform~\citeonline{Terraform2026} (versão 1.9.x) como ferramenta de definição declarativa da infraestrutura.
+    \item \textbf{Ferramental de segurança (Policy-as-Code e SAST):}
+    \begin{itemize}
+        \item \textbf{Checkov}~\citeonline{Checkov2026}: análise estática de \texttt{.tf} e \texttt{Dockerfile}, com regras baseadas em CIS AWS~\citeonline{CIS2024AWS}.
+        \item \textbf{Open Policy Agent (OPA) / Conftest}~\citeonline{OPA2024}: verificação de políticas customizadas em \textit{Rego} contra o \texttt{terraform plan} (formato JSON) e manifestos Kubernetes.
+        \item \textbf{Gitleaks}~\citeonline{Gitleaks2026} e \textbf{GitGuardian (ggshield)}~\citeonline{GitGuardian2024}: detecção de segredos em duas camadas (OSS + SaaS).
+        \item \textbf{Trivy}~\citeonline{Trivy2026}: análise de vulnerabilidades em sistema de arquivos e imagens de contêiner.
+        \item \textbf{Hadolint}~\citeonline{Hadolint2026}: \textit{linter} para \textit{Dockerfiles}.
+        \item \textbf{TFLint}: \textit{linter} adicional para HCL.
+    \end{itemize}
+    \item \textbf{Controle de versão e CI/CD:} repositórios Git hospedados no GitHub~\citeonline{Github2026}, com \textit{pipelines} declarativos em GitHub Actions~\citeonline{GitHubActions2026}. Na PoC AWS, a autenticação com a nuvem é federada via OIDC, dispensando chaves de longa duração no repositório.
+\end{itemize}
+
+\section{Critérios de Medição}
+\label{sec:metricas}
+
+Para viabilizar uma análise comparativa consistente entre o cenário anterior (segurança reativa e manual, tomado como \textit{baseline} da literatura e da experiência profissional do autor) e o cenário após a implementação do modelo, foram adotadas as seguintes métricas, alinhadas à literatura de DevSecOps~\citeonline{forsgren2018accelerate, kim2021devops, jimenez2019state}:
+
+\begin{itemize}
+    \item \textbf{Taxa de detecção precoce de vulnerabilidades:} percentual de falhas críticas identificadas antes da fase de \textit{deploy};
+    \item \textbf{Tempo médio de validação de segurança:} intervalo entre a submissão do código e a conclusão da análise de conformidade;
+    \item \textbf{Número de interrupções automáticas (\textit{Fail-Fast}):} número de execuções bloqueadas por não cumprimento de políticas;
+    \item \textbf{Taxa de falsos positivos:} percentual de alertas que, após análise, não representavam ameaça real;
+    \item \textbf{Cobertura da esteira:} percentual de etapas do \textit{pipeline} com verificações automatizadas de segurança;
+    \item \textbf{Rastreabilidade:} capacidade de relacionar cada alteração de infraestrutura ao respectivo \textit{commit}, política aplicada e resultado observado.
+\end{itemize}
+
+\section{Procedimentos de Validação e Testes Controlados}
+\label{sec:testes-controlados}
+
+A validação do modelo ocorreu por meio da execução de \textbf{casos de teste concretos}, nos quais configurações inseguras foram introduzidas intencionalmente no código IaC e submetidas à esteira DevSecOps. O sucesso da metodologia foi medido pela capacidade da esteira em identificar essas falhas em tempo de \textit{build} e impedir o provisionamento de recursos não conformes.
+
+Diferentemente de uma inspeção genérica, cada configuração testada tem \textbf{controle formal associado} (CIS ou NIST), \textbf{política executável correspondente} (Checkov ID ou regra OPA/Rego) e \textbf{resultado esperado} previamente definido. A Tabela~\ref{tab:testes-controlados} apresenta os casos de teste executados nas duas PoC.
+
+\begin{table}[!ht]
+\centering
+\caption{Casos de teste controlados executados nas Provas de Conceito}
+\label{tab:testes-controlados}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{4.2cm}|p{3.1cm}|p{4.0cm}|p{3.2cm}|}
+\hline
+\textbf{Cenário de teste} & \textbf{Controle} & \textbf{Política aplicada} & \textbf{Ferramenta} \\
+\hline
+Bucket S3 sem SSE (\textit{aws\_s3\_bucket} sem \texttt{server\_side\_encryption\_configuration}) & CIS AWS 2.1.1 & \texttt{deny\_unencrypted\_s3.rego}; CKV\_AWS\_19 & OPA + Checkov \\
+\hline
+Bucket S3 sem \texttt{public\_access\_block} & CIS AWS 2.1.5 & \texttt{deny\_unencrypted\_s3.rego} & OPA + Checkov \\
+\hline
+\textit{Security Group} liberando SSH (22) para \texttt{0.0.0.0/0} & CIS AWS 5.2 & \texttt{deny\_public\_ssh.rego}; CKV\_AWS\_24 & OPA + Checkov \\
+\hline
+\textit{Security Group} liberando RDP (3389) para \texttt{0.0.0.0/0} & CIS AWS 5.2 & \texttt{deny\_public\_ssh.rego} & OPA \\
+\hline
+Instância EC2 sem IMDSv2 & CIS AWS 5.6 & \texttt{enforce\_imdsv2.rego} & OPA \\
+\hline
+Política IAM concedendo \texttt{Action="*"} + \texttt{Resource="*"} & NIST SP 800-53 AC-6 & \texttt{deny\_admin\_iam.rego} & OPA \\
+\hline
+RDS/EBS sem criptografia em repouso & CIS AWS 2.3 / 2.2 & \texttt{deny\_unencrypted\_rds\_ebs.rego} & OPA \\
+\hline
+\textit{Deploy} fora da região permitida (\textit{Whitelist}) & Governança / LGPD & \texttt{region\_whitelist.rego} & OPA \\
+\hline
+Instância de família proibida em ambiente \texttt{dev} & FinOps & \texttt{finops\_instance\_types.rego} & OPA \\
+\hline
+Segredo (chave AWS) versionado em \texttt{.env} & OWASP -- \textit{Cryptographic Failures} & Regras padrão + \texttt{.gitleaks.toml} & Gitleaks + GitGuardian \\
+\hline
+Dockerfile sem \texttt{USER} não-\textit{root} & CIS Docker 4.1 & CKV\_DOCKER\_3 & Checkov (Dockerfile) \\
+\hline
+Dockerfile sem \texttt{HEALTHCHECK} & Boas práticas / CIS Docker 4.6 & CKV\_DOCKER\_2 & Checkov (Dockerfile) \\
+\hline
+Contêiner privileged=true & CIS K8s 5.2.1 & \texttt{no\_privileged\_containers.rego} & OPA (K8s) \\
+\hline
+Contêiner sem \texttt{resources.limits} & CIS K8s 5.x / FinOps & \texttt{require\_resource\_limits.rego} & OPA (K8s) \\
+\hline
+Imagem com tag \texttt{:latest} & Boas práticas & \texttt{no\_latest\_tag.rego} & OPA (K8s) \\
+\hline
+\end{tabular}
+\fonte{Elaborado pelo autor}
+\end{table}
+
+Cada caso de teste foi executado nas duas PoC quando aplicável (por exemplo, testes de \textit{Dockerfile} e detecção de segredos são executados em ambas; testes de VPC AWS e IAM são executados apenas na PoC AWS, mas seus equivalentes conceituais -- \textit{Docker network} e Docker \texttt{privileged=false} -- são exercitados na PoC de contêineres). O resultado detalhado desses testes é apresentado no Capítulo~4 (na descrição de cada camada da esteira) e consolidado no Capítulo~5 (Discussões e Conclusões).
+
+\section{Limitações do Estudo}
+
+O estudo apresenta as seguintes limitações, que são explicitadas para preservar o rigor metodológico:
+
+\begin{itemize}
+    \item As duas PoC representam um cenário técnico controlado, e não substituem um estudo longitudinal em ambiente corporativo real, com múltiplos times e diferentes graus de maturidade;
+    \item O \textit{baseline} do cenário ``sem DevSecOps'' é construído a partir de literatura e da experiência profissional do autor -- não se trata de uma medição direta em uma organização controle;
+    \item Os testes concentram-se em falhas classicamente cobertas por CIS Benchmarks; ataques de \textit{supply chain} avançados (por exemplo, comprometimento de \textit{providers} do Terraform Registry) não são cobertos;
+    \item A análise dinâmica (DAST) foi excluída do escopo, sendo mencionada apenas como caminho para trabalhos futuros.
+\end{itemize}

@@ -1,0 +1,58 @@
+{
+  // ==========================================================================
+  // LaTeX Workshop -- integracao com o build 100% Docker.
+  // Todos os artefatos vao para build/.cache/. Os PDFs finais versionados
+  // ficam em pdf/ (gerados por ./build/compile.sh).
+  // ==========================================================================
+
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  "latex-workshop.latex.rootFile.newName": "monografia/ArquivoPrincipal.tex",
+
+  // Uma unica receita: chama nosso wrapper Docker (build/compile.sh).
+  "latex-workshop.latex.recipe.default": "compile (Docker)",
+  "latex-workshop.latex.recipes": [
+    { "name": "compile (Docker)", "tools": ["compile"] }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "compile",
+      "command": "./build/compile.sh",
+      "args": [],
+      "env": {}
+    }
+  ],
+
+  // Rebuild automatico ao salvar.
+  "latex-workshop.latex.autoBuild.run": "onSave",
+
+  // Preview: LaTeX Workshop procura o PDF em outDir/<rootname>.pdf.
+  // Como o wrapper deixa uma copia intermediaria (ArquivoPrincipal.pdf) em
+  // build/.cache/, apontamos pra la para o preview atualizar a cada build.
+  "latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/build/.cache",
+
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+
+  "latex-workshop.latex.autoClean.run": "never",
+  "latex-workshop.message.badbox.show": false,
+
+  "latex-workshop.latex.watch.files.ignore": [
+    "**/build/.cache/**",
+    "**/pdf/**",
+    "**/*.aux",
+    "**/*.bbl",
+    "**/*.blg",
+    "**/*.log",
+    "**/*.out",
+    "**/*.toc",
+    "**/*.fdb_latexmk",
+    "**/*.fls",
+    "**/*.synctex.gz"
+  ],
+
+  "[latex]": {
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
+  }
+}

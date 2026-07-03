@@ -11,7 +11,6 @@
 
 % -------------------------------------------------
 % ELEMENTOS PRÉ-Textuais
-% Os nomes são auto-explicativos
 % -------------------------------------------------
 \include{textos/preambulo/DedicatoriaAgradecimentos}
 \include{textos/resumo}
@@ -25,47 +24,33 @@
 \tableofcontents*
 \cleardoublepage
 \pagenumbering{arabic}
-\pagestyle{plain} %%para incluir a numeração
+\pagestyle{plain}
 
 %-------------------------------------------------
 % CAPÍTULOS
 %-------------------------------------------------
-%Exemplos no Latex, comente a linha abaixo na hora de compilar a versão final
 
-%Capítulo 1 - Introdução - OK
+% Capítulo 1 - Introdução
 \include{capitulos/introducao}
 
-%Capítulo 2 - Revisão da Literatura - OK
+% Capítulo 2 - Revisão da Literatura
 \include{capitulos/revisaoLiteratura}
 
-%Capítulo 3 - Metodologia - OK
+% Capítulo 3 - Materiais e Metodologia
 \include{capitulos/metodologia}
 
-%Capítulo 4 - Desenvolvimento e Implementação - OK
+% Capítulo 4 - Desenvolvimento e Implementação (inclui as duas PoC:
+% AWS real e Contêineres locais, com blocos de código e figuras)
 \include{capitulos/desenvolvimentoImplementacao}
 
-%Capítulo 5 - Análise e Discussão de Resultados - OK
+% Capítulo 5 - Discussões e Conclusões (unificação da antiga análise
+% de resultados com o antigo capítulo de conclusão, atendendo à sugestão
+% da banca; o apêndice foi incorporado ao capítulo 4)
 \include{capitulos/resultados}
-
-%Capítulo 6 - Conclusão - OK
-\include{capitulos/conclusao}
 
 % ----------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS
 % ----------------------------------------------------------
 \bibliography{Referencias.bib}
-
-
-% ----------------------------------------------------------
-% APÊNDICES
-% ----------------------------------------------------------
-\postextual
-\appendix
-\begin{apendicesenv}
-
-\include{textos/apendices/apendiceB}
-
-\end{apendicesenv}
-
 
 \end{document}

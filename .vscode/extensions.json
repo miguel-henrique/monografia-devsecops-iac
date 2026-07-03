@@ -1,0 +1,7 @@
+{
+  // Extensoes recomendadas ao abrir este projeto no Cursor.
+  // O Cursor perguntara se quer instalar quando o workspace for aberto.
+  "recommendations": [
+    "james-yu.latex-workshop"
+  ]
+}

@@ -1,0 +1,136 @@
+\chapter{Revisão da Literatura}
+
+A revisão da literatura estabelece as bases teóricas e conceituais para a integração de DevSecOps e Infraestrutura como Código (IaC), abordando a evolução dessas práticas e sua relevância no contexto de automação e segurança. Este capítulo é organizado em blocos que partem dos fundamentos culturais e de processo (DevOps e DevSecOps), passam pelos fundamentos técnicos de nuvem (VPC, sub-redes, \textit{security groups}, IAM), abordam a materialização da infraestrutura por meio da IaC e das plataformas de contêineres, e concluem com a discussão sobre políticas de conformidade automatizadas (Policy-as-Code). Ao final, discute-se a convergência dessas abordagens como uma solução abrangente para os desafios contemporâneos em TI.
+
+\begin{enumerate}
+    \item \textbf{DevSecOps:} incorpora a segurança como aspecto essencial e integrado ao ciclo de vida de desenvolvimento de software (SDLC), por meio de automação, colaboração entre equipes e adoção de princípios como \textit{Shift-Left}~\citeonline{kim2021devops, myrbakken2017devsecops};
+    \item \textbf{Infraestrutura como Código (IaC):} gerenciamento da infraestrutura de TI por meio de arquivos de configuração legíveis por humanos, permitindo consistência, reprodutibilidade e controle de mudanças~\citeonline{morris2020infrastructure, brikman2022terraform};
+    \item \textbf{Redes e serviços em nuvem:} fundamentos de VPC, sub-redes, roteamento, \textit{security groups}, IAM, KMS e serviços gerenciados que compõem uma arquitetura em nuvem pública~\citeonline{AWSVPC2026};
+    \item \textbf{Contêineres:} unidades leves de empacotamento e execução de software (Docker, Kubernetes) que permitem reproduzir aplicações e infraestrutura de forma consistente entre ambientes~\citeonline{merkel2014docker, casalicchio2020container};
+    \item \textbf{Policy-as-Code:} tradução de políticas de segurança e governança para código executável, geralmente em linguagens declarativas como \textit{Rego}~\citeonline{OPA2024};
+    \item \textbf{Integração DevSecOps + IaC:} união dessas abordagens em uma solução abrangente para desafios de automação e segurança em ambientes computacionais complexos~\citeonline{sanchez2020devsecops, ansaroudi2023control}.
+\end{enumerate}
+
+A seguir, detalha-se cada uma dessas dimensões com base na literatura existente.
+
+\section{DevOps e a Evolução para DevSecOps}
+
+\subsection{DevOps: cultura e automação}
+
+DevOps é definido como um movimento cultural e um conjunto de práticas que aproximam desenvolvimento (\textit{Dev}) e operações (\textit{Ops}) com o objetivo de entregar software com maior frequência, previsibilidade e qualidade~\citeonline{kim2021devops, humble2010continuous}. Os autores do \textit{DevOps Handbook}~\citeonline{kim2021devops} organizam essas práticas em três ``vias'': (i) fluxo, isto é, a capacidade de mover valor da ideia à produção; (ii) \textit{feedback}, a capacidade de aprender rapidamente com o que é entregue; e (iii) aprendizado contínuo, a construção de uma cultura de experimentação segura. O estudo empírico apresentado por \citeonline{forsgren2018accelerate}, baseado em milhares de organizações, indica que a adoção dessas práticas está fortemente associada a maior desempenho de entrega e a maior confiabilidade operacional.
+
+\subsection{DevSecOps}
+
+A partir desse arcabouço, DevSecOps emerge como uma evolução natural que incorpora segurança de forma contínua e compartilhada ao longo do ciclo de vida, e não como uma fase estanque ao final~\citeonline{vehent2018securing, myrbakken2017devsecops}. Revisões multivocais e sistemáticas apontam três dimensões recorrentes na definição do termo~\citeonline{myrbakken2017devsecops, sanchez2020devsecops, mao2020devsecops}: (i) automação de controles de segurança nas pipelines; (ii) cultura de responsabilidade compartilhada, em que segurança deixa de ser papel exclusivo de uma equipe; e (iii) mensuração contínua, permitindo evidências objetivas de conformidade.
+
+As principais práticas incluem:
+
+\begin{itemize}
+    \item \textbf{\textit{Shift-Left}:} priorização de testes e revisões de segurança nas fases iniciais do ciclo de vida, reduzindo o custo de correção~\citeonline{jimenez2019state}.
+    \item \textbf{Automação:} uso de \textit{scanners} de vulnerabilidades e integração de segurança nos \textit{pipelines} de CI/CD~\citeonline{ullah2019cloud}.
+    \item \textbf{Colaboração:} cultura na qual a segurança é responsabilidade de todos, com métricas visíveis para desenvolvedores, operações e negócio.
+\end{itemize}
+
+\citeonline{kim2021devops} destacam que a segurança deve ser tratada como um problema compartilhado entre as equipes de desenvolvimento e operações, com práticas integradas ao fluxo de trabalho diário. \citeonline{vehent2018securing} reforça que adicionar segurança ao DevOps requer mais do que ferramentas: exige uma mudança cultural que priorize a segurança sem comprometer a velocidade e a agilidade.
+
+\subsection{Shift-Left na prática}
+
+O conceito de \textit{Shift-Left} refere-se à prática de integrar atividades de segurança e qualidade no início do ciclo de desenvolvimento, ao invés de tratá-las como etapas finais~\citeonline{jimenez2019state}. Essa abordagem busca identificar e corrigir problemas de segurança durante as fases de planejamento, \textit{design} e codificação, o que reduz custos e aumenta a eficiência. Para isso, ferramentas automatizadas como \textit{scanners} de código estático (SAST), análise de composição de \textit{software} (SCA) e verificações de \textit{secrets} são usadas para detectar vulnerabilidades antes que o \textit{software} avance para etapas mais complexas, como testes ou implantação~\citeonline{ullah2019cloud}.
+
+Essa mudança para a esquerda no \textit{pipeline} de desenvolvimento promove uma cultura de segurança como responsabilidade compartilhada, envolvendo desenvolvedores, equipes de qualidade e operações desde o início. Práticas como testes unitários com foco em segurança, integração contínua com validações automatizadas e treinamento dos desenvolvedores sobre vulnerabilidades comuns -- como as listadas no OWASP Top 10~\citeonline{OWASP2025} -- são pilares do \textit{Shift-Left}. Estudos de caso industriais demonstram que a adoção de \textit{Shift-Left} pode reduzir significativamente o tempo médio de detecção (TTD) de vulnerabilidades~\citeonline{jimenez2019state}.
+
+\section{Fundamentos de Redes em Nuvem}
+\label{sec:fundamentos-rede}
+
+Para que o restante do trabalho seja compreensível, esta seção apresenta os conceitos de rede em nuvem utilizados nas Provas de Conceito, evitando pressupor conhecimento prévio do leitor.
+
+\subsection{Virtual Private Cloud (VPC)}
+
+Uma \textit{Virtual Private Cloud} (VPC) é uma rede virtual privada, logicamente isolada dentro de um provedor de nuvem pública, na qual o cliente controla o intervalo de endereços IP (CIDR), a topologia de sub-redes, as tabelas de rota e as políticas de firewall~\citeonline{AWSVPC2026}. Diferentemente de uma rede local tradicional, a VPC é definida por \textit{software} (\textit{Software-Defined Networking}), o que permite modelá-la e alterá-la por meio de código.
+
+A modelagem de uma VPC envolve, tipicamente:
+
+\begin{itemize}
+    \item \textbf{Bloco CIDR} (por exemplo, \texttt{10.20.0.0/16}), que determina o intervalo de endereços IP privados disponíveis para os recursos da rede;
+    \item \textbf{Sub-redes públicas}, com rota para a Internet via \textit{Internet Gateway}, tipicamente reservadas para \textit{load balancers} e \textit{bastion hosts};
+    \item \textbf{Sub-redes privadas de aplicação}, sem rota direta para a Internet, destinadas a \textit{workloads} como \textit{clusters} Kubernetes;
+    \item \textbf{Sub-redes privadas de dados}, isoladas ainda mais, destinadas a bancos de dados gerenciados (por exemplo, RDS);
+    \item \textbf{NAT Gateway}, que permite tráfego de saída (\textit{egress}) das sub-redes privadas para a Internet, sem expor endereços IP internos;
+    \item \textbf{VPC Endpoints}, que possibilitam acesso privado a serviços da nuvem (por exemplo, S3, KMS, Secrets Manager) sem trafegar pela Internet pública;
+    \item \textbf{VPC Flow Logs}, registros do tráfego de rede utilizados para auditoria forense e detecção de anomalias, exigidos pelo controle CIS 3.9~\citeonline{CIS2024AWS}.
+\end{itemize}
+
+A distribuição das sub-redes em múltiplas \textit{Availability Zones} (AZ) é a base para alta disponibilidade. A boa prática determina, adicionalmente, restringir o \textit{security group} \textit{default} e a \textit{network ACL default} da VPC, conforme os controles CIS 5.3 e 5.4~\citeonline{CIS2024AWS}.
+
+\subsection{Security Groups, IAM e criptografia}
+
+\textit{Security Groups} são \textit{firewalls} \textit{stateful} de nível de instância que definem quais fluxos de rede são permitidos para cada recurso~\citeonline{AWSVPC2026}. Regras excessivamente permissivas -- por exemplo, permitir SSH (porta 22) originado de \texttt{0.0.0.0/0} -- são uma das causas mais frequentes de comprometimento e figuram entre os principais controles do CIS Benchmarks (item 5.2)~\citeonline{CIS2024AWS}.
+
+O modelo de \textit{Identity and Access Management} (IAM) rege quem (usuários, papéis ou serviços) pode executar quais ações sobre quais recursos. Boas práticas exigem o princípio do privilégio mínimo, a rotação de credenciais, o uso de MFA para operações sensíveis e a federação de identidade (por exemplo, via OIDC) para eliminar credenciais de longa duração em pipelines~\citeonline{CIS2024AWS, nist800218}.
+
+A criptografia em repouso (\textit{Server-Side Encryption}, SSE) para armazenamento de objetos (S3), volumes (EBS) e bancos (RDS) e a criptografia em trânsito (TLS) para comunicações são, hoje, requisitos regulatórios em setores como o financeiro e o de saúde, além de estarem previstas na LGPD~\citeonline{lgpd2018} e no CIS Benchmarks (itens 2.1.1 a 2.1.5)~\citeonline{CIS2024AWS}. Chaves de criptografia gerenciadas pelo cliente por meio de um \textit{Key Management Service} (KMS) permitem separação de responsabilidades e auditoria de uso das chaves.
+
+\section{Infraestrutura como Código (IaC)}
+
+IaC transforma a gestão da infraestrutura, substituindo processos manuais por automação baseada em arquivos de configuração versionados~\citeonline{morris2020infrastructure}. Os principais benefícios são:
+
+\begin{itemize}
+    \item \textbf{Reprodutibilidade:} redução de erros humanos, com sistemas provisionados de forma idêntica em diferentes ambientes;
+    \item \textbf{Gestão de configurações:} consistência e controle de mudanças por meio do sistema de controle de versão;
+    \item \textbf{Segurança:} incorporação de políticas de segurança diretamente nas configurações;
+    \item \textbf{Escalabilidade:} capacidade de replicar padrões em múltiplas contas, regiões e ambientes~\citeonline{guerriero2019adoption}.
+\end{itemize}
+
+As principais ferramentas de IaC incluem \textit{Terraform}~\citeonline{Terraform2026}, \textit{Ansible}, \textit{Pulumi} e \textit{AWS CloudFormation}, cada uma com características específicas que atendem a diferentes necessidades organizacionais.
+
+Segundo \citeonline{morris2020infrastructure}, infraestrutura tratada como código é fundamental para habilitar mudanças rápidas, seguras e confiáveis, permitindo que as equipes colaborem e iterem continuamente. Além disso, IaC reduz erros humanos e fornece documentação implícita ao transformar a infraestrutura em algo que pode ser versionado e testado como qualquer outro código~\citeonline{brikman2022terraform}. Contudo, estudos empíricos mostram que arquivos IaC também carregam \textit{security smells} próprios -- como segredos em texto plano, uso de credenciais \textit{hard-coded} ou permissões excessivas -- que demandam análise estática específica~\citeonline{rahman2019sharpshooter}.
+
+\section{Contêineres e Orquestração}
+\label{sec:containers-orquestracao}
+
+Contêineres são unidades leves de empacotamento que agrupam código de aplicação, dependências e configuração em uma imagem imutável, executada como um processo isolado sobre o \textit{kernel} do sistema hospedeiro~\citeonline{merkel2014docker}. Diferentemente de máquinas virtuais tradicionais, os contêineres compartilham o \textit{kernel} do hospedeiro, o que reduz consumo de recursos e tempo de inicialização, mas exige atenção específica a controles como isolamento de processos (\textit{namespaces}), limites de recursos (\textit{cgroups}) e políticas de segurança do sistema operacional~\citeonline{nist800190, casalicchio2020container}.
+
+No plano de orquestração, o \textit{Kubernetes} tornou-se o \textit{de facto standard} para gestão de aplicações em contêineres, com abstrações como \textit{Deployments}, \textit{StatefulSets}, \textit{Services}, \textit{Ingress} e \textit{NetworkPolicies}~\citeonline{Kubernetes2026, arundel2022kubernetes}. Do ponto de vista de segurança, o CIS Kubernetes Benchmark~\citeonline{CISKubernetes2024} define controles como a proibição de contêineres privilegiados, execução como usuário não-\textit{root}, imposição de \textit{resource limits} e uso de \textit{NetworkPolicies} para limitar tráfego \textit{leste-oeste} entre \textit{pods}. Estudos empíricos sobre segurança em imagens de contêineres, como o de \citeonline{shu2017study}, evidenciam a alta incidência de vulnerabilidades em imagens públicas, reforçando a necessidade de \textit{scanning} contínuo (por exemplo, com \textit{Trivy})~\citeonline{Trivy2026} e de \textit{linting} de \textit{Dockerfiles} (\textit{Hadolint})~\citeonline{Hadolint2026}.
+
+Neste trabalho, a plataforma de contêineres serve a dois papéis: (i) na PoC de nuvem AWS, é o próprio \textit{workload} da aplicação em EKS; (ii) na PoC local, é o substrato que \textbf{simula} os serviços da nuvem (VPC, RDS, ALB) para fins de reprodutibilidade acadêmica.
+
+\section{Policy-as-Code e Conformidade Automatizada}
+
+Policy-as-Code é a prática de expressar políticas de segurança, conformidade e governança em uma linguagem declarativa, tratando-as como código versionado, revisado por pares e executado automaticamente~\citeonline{OPA2024}. O \textit{Open Policy Agent} (OPA), com a linguagem \textit{Rego}, é uma das implementações mais adotadas dessa abordagem, capaz de avaliar políticas contra qualquer dado estruturado -- inclusive planos de execução do Terraform (\texttt{terraform plan -out=plan.tfplan; terraform show -json}) e manifestos do Kubernetes~\citeonline{OPA2024}.
+
+Complementarmente, ferramentas de análise estática dedicadas a IaC, como o \textit{Checkov}~\citeonline{Checkov2026}, trazem centenas de políticas pré-configuradas baseadas em \textit{benchmarks} de mercado (CIS AWS Foundations~\citeonline{CIS2024AWS}, CIS Kubernetes~\citeonline{CISKubernetes2024}, NIST SP 800-53). Na camada de código-fonte, ferramentas como \textit{Gitleaks}~\citeonline{Gitleaks2026} e \textit{GitGuardian}~\citeonline{GitGuardian2024} realizam detecção de segredos versionados; para \textit{Dockerfiles} e imagens, \textit{Hadolint}~\citeonline{Hadolint2026} e \textit{Trivy}~\citeonline{Trivy2026} cobrem, respectivamente, \textit{lint} e análise de vulnerabilidades.
+
+A literatura acadêmica recente~\citeonline{ansaroudi2023control} apresenta análises formais de fluxo de controle para verificar propriedades de segurança em configurações IaC, indicando que o campo caminha para uma sofisticação crescente das técnicas de verificação automatizada.
+
+\section{Frameworks e Padrões de Referência}
+
+\subsection{OWASP Top 10}
+
+O OWASP Top 10~\citeonline{OWASP2025} organiza as dez classes de risco mais críticas em aplicações \textit{web} com base em dados coletados globalmente. Neste trabalho, ele é utilizado principalmente como norteador dos controles de \textit{Application Security} adjacentes ao ciclo de IaC (por exemplo, prevenção de injeção via \textit{scanning} de imagens e detecção de segredos em código).
+
+\subsection{CIS Benchmarks}
+
+O CIS Benchmarks~\citeonline{CIS2024AWS, CISKubernetes2024} é um conjunto de recomendações de configuração segura mantido pelo \textit{Center for Internet Security}, com versões específicas para AWS, Kubernetes, Linux, Docker, entre outros. Ele fornece controles verificáveis (por exemplo, ``2.1.1: buckets S3 com criptografia em repouso'') que se traduzem naturalmente em políticas Checkov e OPA.
+
+\subsection{NIST SP 800-190, 800-204 e SSDF (800-218)}
+
+As publicações especiais do NIST oferecem orientações mais amplas: a SP 800-190~\citeonline{nist800190} descreve controles de segurança para \textit{application containers}; a SP 800-204~\citeonline{nist800204} trata de \textit{microservices}; e a SP 800-218 (\textit{Secure Software Development Framework})~\citeonline{nist800218} oferece um \textit{framework} genérico para desenvolvimento seguro, cujos requisitos práticos se alinham ao modelo DevSecOps.
+
+\subsection{LGPD}
+
+No Brasil, a Lei Geral de Proteção de Dados~\citeonline{lgpd2018} impõe obrigações concretas relacionadas ao ciclo de vida da infraestrutura: pseudonimização, controle de acesso, criptografia, registro de tratamento e resposta a incidentes. Regras de governança implementadas via Policy-as-Code (por exemplo, restrição de regiões de \textit{deploy} para o Brasil) podem servir como controle preventivo alinhado à LGPD.
+
+\section{Integração de DevSecOps e IaC}
+
+A combinação de DevSecOps e IaC permite um modelo em que a segurança é implementada automaticamente durante o provisionamento e a gestão da infraestrutura~\citeonline{sanchez2020devsecops}. Os principais ganhos são:
+
+\begin{itemize}
+    \item \textbf{Detecção precoce de vulnerabilidades:} integração de \textit{scanners} de segurança em \textit{pipelines} CI/CD~\citeonline{ullah2019cloud};
+    \item \textbf{Conformidade automatizada:} aderência a normas e regulamentações por meio de políticas incorporadas ao código~\citeonline{OPA2024};
+    \item \textbf{Eficiência operacional:} redução de custos e do tempo associado a falhas de segurança~\citeonline{forsgren2018accelerate};
+    \item \textbf{Rastreabilidade:} cada mudança na infraestrutura carrega, no mesmo \textit{commit}, o código e as políticas que a autorizaram~\citeonline{morris2020infrastructure}.
+\end{itemize}
+
+Ferramentas como \textit{Checkov}~\citeonline{Checkov2026} e \textit{Open Policy Agent}~\citeonline{OPA2024} auxiliam na verificação de conformidade e na aplicação de políticas de segurança em códigos IaC. A união de DevSecOps e IaC promete abordar questões críticas de segurança e automação, possibilitando melhorias significativas em operações de TI. \citeonline{arundel2022kubernetes} afirmam que a convergência de DevOps, segurança e infraestrutura como código cria um ciclo de \textit{feedback} contínuo, no qual automação e governança trabalham em harmonia. Na mesma linha, \citeonline{forsgren2018accelerate} enfatizam que organizações que integram segurança no fluxo de trabalho e adotam práticas modernas, como IaC, apresentam desempenho significativamente superior.
+
+Por fim, a revisão sistemática de \citeonline{sanchez2020devsecops} e o estudo de \citeonline{mao2020devsecops} apontam que a adoção de DevSecOps ainda enfrenta desafios organizacionais -- especialmente relacionados à cultura e ao tratamento de falsos positivos --, o que motiva estudos aplicados como o desta monografia, focados em modelos práticos e reprodutíveis para diferentes contextos.

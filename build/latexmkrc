@@ -1,0 +1,31 @@
+# =============================================================================
+# latexmkrc  --  receita de build da monografia (executada dentro do container
+# texlive/texlive:latest). E chamada explicitamente pelos scripts em build/:
+#     latexmk -r /work/build/latexmkrc
+#
+# Convencao dos caminhos (dentro do container):
+#   /work/monografia   -> fontes .tex/.bib (CWD durante o build)
+#   /work/build/.cache -> auxiliares + PDF bruto (ArquivoPrincipal.pdf)
+#   /work/pdf          -> destino final, renomeado pelo script compile.sh
+# =============================================================================
+
+@default_files = ('ArquivoPrincipal.tex');
+
+$pdf_mode  = 1;
+$pdflatex  = 'pdflatex -interaction=nonstopmode -file-line-error -synctex=1 %O %S';
+
+# abntex2cite usa BibTeX classico. `2` forca latexmk a rodar bibtex mesmo
+# quando existem apenas citacoes indefinidas no primeiro pass.
+$bibtex_use = 2;
+$bibtex     = 'bibtex %O %B';
+
+# Cross-references (listagens, tabelas ABNT, citeonline) exigem varios passes.
+$max_repeat = 7;
+
+# Cache de auxiliares fora de monografia/ (mantem o codigo-fonte limpo).
+$out_dir = '/work/build/.cache';
+$aux_dir = '/work/build/.cache';
+
+# Faz o TeX achar arquivos incluidos em subdiretorios (Arquivos/, capitulos/,
+# textos/, figuras/...).
+ensure_path('TEXINPUTS', './/');

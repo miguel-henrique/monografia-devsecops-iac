@@ -1,0 +1,172 @@
+\usepackage[alf,abnt-etal-cite=3,abnt-etal-list=0]{abntex2cite}
+\usepackage{lmodern}	       % Usa a fonte Latin Modern
+\usepackage[table]{xcolor} 
+\usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
+\usepackage[utf8]{inputenc}		% Codificacao do documento (conversão automática dos acentos)
+\usepackage{lastpage}			% Usado pela Ficha catalográfica
+\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.
+\usepackage{color}				% Controle das cores
+\usepackage{graphicx}			% Inclusão de gráficos
+\usepackage{microtype} 			% para melhorias de justificação
+\usepackage{graphicx}
+\definecolor{color_200_200_200}{RGB}{200,200,200}
+
+% pacotes adicionados
+\usepackage{amsmath}
+\usepackage{amssymb,amsfonts,amsthm}
+\usepackage{setspace}
+\usepackage{pdfpages} 
+\usepackage{hyperref}
+\usepackage{adjustbox}
+% \usepackage{todonotes}
+
+\hypersetup{
+     	%pagebackref=true,
+		colorlinks=true,       		% false: boxed links; true: colored links
+    	linkcolor=black,          	% color of internal links
+    	citecolor=black,        		% color of links to bibliography
+    	filecolor=magenta,      		% color of file links
+		urlcolor=blue,
+		bookmarksdepth=4
+}
+
+
+\definecolor{blue}{RGB}{41,5,195}
+
+% O tamanho do parágrafo é dado por:
+\setlength{\parindent}{1.3cm}
+
+% Controle do espaçamento entre um parágrafo e outro:
+\setlength{\parskip}{0.2cm}  % tente também \onelineskip
+
+% Novo list of (listings) para QUADROS
+
+\newcommand{\quadroname}{Quadro}
+\newcommand{\listofquadrosname}{Lista de quadros}
+
+\newfloat[chapter]{quadro}{loq}{\quadroname}
+\newlistof{listofquadros}{loq}{\listofquadrosname}
+\newlistentry{quadro}{loq}{0}
+
+% configurações para atender às regras da ABNT
+\setfloatadjustment{quadro}{\centering}
+\counterwithout{quadro}{chapter}
+\renewcommand{\cftquadroname}{\quadroname\space} 
+\renewcommand*{\cftquadroaftersnum}{\hfill--\hfill}
+
+% Configuração de posicionamento padrão:
+\setfloatlocations{quadro}{hbtp}
+\usepackage{booktabs, multirow} % for borders and merged ranges
+\usepackage{soul}% for underlines
+\usepackage[table]{xcolor} % for cell colors
+\usepackage{changepage,threeparttable} % for wide tables
+\usepackage{array} 
+\usepackage{ragged2e} 
+\usepackage{makecell}
+\usepackage{tabularx}
+
+
+%\usepackage{fancyhdr}
+%\pagestyle{fancy}
+%\fancyhf{} % clear existing header/footer entries
+% Place Page X of Y on the right-hand
+% side of the footer
+%\fancyfoot[R]{Página \thepage \hspace{1pt} de \pageref{LastPage}}
+
+\usepackage{xspace}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings, skins}
+
+% -------------------------------------------------------------
+% Trecho de codigo em linha (mantido do template original: \begin{foo}...\end{foo})
+% -------------------------------------------------------------
+\newtcblisting{foo}{
+  listing only,
+  nobeforeafter,
+  after={\xspace},
+  hbox,
+  tcbox raise base,
+  fontupper=\ttfamily,
+  colback=lightgray,
+  colframe=lightgray,
+  size=fbox
+  }
+
+% -------------------------------------------------------------
+% Blocos de codigo (listings): Terraform (HCL), YAML, Python, Dockerfile, Rego, Bash
+% -------------------------------------------------------------
+\usepackage{listings}
+
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeframe}{RGB}{200,200,200}
+\definecolor{codekw}{RGB}{0,0,180}
+\definecolor{codestr}{RGB}{163,21,21}
+\definecolor{codecomm}{RGB}{60,120,60}
+\definecolor{codeln}{RGB}{110,110,110}
+
+\lstdefinelanguage{HCL}{
+  morekeywords={resource,module,provider,variable,output,data,locals,terraform,for,in,if,else,true,false,null,dynamic,content,depends_on,count,for_each,each,var},
+  morecomment=[l]{\#},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  sensitive=true,
+}
+
+\lstdefinelanguage{yaml}{
+  morekeywords={name,on,jobs,steps,uses,with,run,env,if,needs,strategy,matrix,continue-on-error,permissions,working-directory,runs-on,apiVersion,kind,metadata,spec,containers,image,ports,resources,requests,limits,securityContext,replicas,template,selector,namespace,labels,volumes,env,valueFrom,configMap,secretKeyRef},
+  morecomment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true,
+}
+
+\lstdefinelanguage{Rego}{
+  morekeywords={package,import,default,not,some,in,contains,if,else,rule,input,data,every,as,with,true,false,null,print,sprintf},
+  morecomment=[l]{\#},
+  morestring=[b]",
+  morestring=[b]`,
+  sensitive=true,
+}
+
+\lstdefinelanguage{dockerfile}{
+  morekeywords={FROM,RUN,CMD,LABEL,MAINTAINER,EXPOSE,ENV,ADD,COPY,ENTRYPOINT,VOLUME,USER,WORKDIR,ARG,ONBUILD,STOPSIGNAL,HEALTHCHECK,SHELL},
+  morecomment=[l]{\#},
+  morestring=[b]",
+  morestring=[b]',
+  sensitive=true,
+}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{codekw}\bfseries,
+  stringstyle=\color{codestr},
+  commentstyle=\color{codecomm}\itshape,
+  numberstyle=\tiny\color{codeln},
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  numbers=left,
+  numbersep=6pt,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  tabsize=2,
+  aboveskip=0.5\baselineskip,
+  belowskip=0.5\baselineskip,
+  literate=
+    {á}{{\'a}}1 {ã}{{\~a}}1 {â}{{\^a}}1 {à}{{\`a}}1
+    {é}{{\'e}}1 {ê}{{\^e}}1
+    {í}{{\'i}}1
+    {ó}{{\'o}}1 {õ}{{\~o}}1 {ô}{{\^o}}1
+    {ú}{{\'u}}1 {ü}{{\"u}}1
+    {ç}{{\c c}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {Ç}{{\c C}}1,
+}
+
+% Nome do quadro para blocos de codigo (padrao ABNT: "Quadro")
+\renewcommand{\lstlistingname}{Quadro}
+\renewcommand{\lstlistlistingname}{Lista de Quadros}
