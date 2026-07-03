@@ -13,39 +13,40 @@ A análise que se segue apoia-se nos casos de teste controlados enumerados na Se
 \caption{Resultados observados nas duas PoC para os casos de teste controlados}
 \label{tab:resultados-testes}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{|p{4.3cm}|p{2.7cm}|p{2.7cm}|p{4.5cm}|}
+\footnotesize
+\begin{tabular}{|L{4.0cm}|L{2.5cm}|L{2.7cm}|L{4.8cm}|}
 \hline
 \textbf{Caso de teste} & \textbf{Ferramenta / Gate} & \textbf{Comportamento observado} & \textbf{Justificativa} \\
 \hline
-Bucket S3 sem SSE & OPA + Checkov & Pipeline interrompida no gate 3 (OPA) & Regra \texttt{deny\_unencrypted\_s3.rego} imprime CIS 2.1.1 no \textit{output} do \textit{conftest} \\
+Bucket S3 sem SSE & OPA + Checkov & Pipeline interrompida no gate 3 (OPA) & Regra \pathtt{deny\_unencrypted\_s3.rego} imprime CIS 2.1.1 no \textit{output} do \textit{conftest} \\
 \hline
-Bucket S3 sem \texttt{public\_access\_block} & OPA + Checkov & Pipeline interrompida & Mesma política, cláusula CIS 2.1.5 \\
+Bucket S3 sem \pathtt{public\_access\_block} & OPA + Checkov & Pipeline interrompida & Mesma política, cláusula CIS 2.1.5 \\
 \hline
-SG com SSH 22 para \texttt{0.0.0.0/0} & OPA + Checkov & Pipeline interrompida no gate 3 & \texttt{deny\_public\_ssh.rego}; CIS 5.2 \\
+SG com SSH 22 para \texttt{0.0.0.0/0} & OPA + Checkov & Pipeline interrompida no gate 3 & \pathtt{deny\_public\_ssh.rego}; CIS 5.2 \\
 \hline
-SG com RDP 3389 para \texttt{0.0.0.0/0} & OPA & Pipeline interrompida & \texttt{deny\_public\_ssh.rego} \\
+SG com RDP 3389 para \texttt{0.0.0.0/0} & OPA & Pipeline interrompida & \pathtt{deny\_public\_ssh.rego} \\
 \hline
-EC2 sem IMDSv2 & OPA & Pipeline interrompida & \texttt{enforce\_imdsv2.rego}; CIS 5.6 / EKS Benchmark 4.3 \\
+EC2 sem IMDSv2 & OPA & Pipeline interrompida & \pathtt{enforce\_imdsv2.rego}; CIS 5.6 / EKS Benchmark 4.3 \\
 \hline
-IAM \texttt{Action="*"} + \texttt{Resource="*"} & OPA & Pipeline interrompida & \texttt{deny\_admin\_iam.rego}; NIST AC-6 \\
+IAM \texttt{Action="*"} + \texttt{Resource="*"} & OPA & Pipeline interrompida & \pathtt{deny\_admin\_iam.rego}; NIST AC-6 \\
 \hline
-RDS/EBS sem criptografia & OPA + Checkov & Pipeline interrompida & \texttt{deny\_unencrypted\_rds\_ebs.rego}; CIS 2.2/2.3 \\
+RDS/EBS sem criptografia & OPA + Checkov & Pipeline interrompida & \pathtt{deny\_unencrypted\_rds\_ebs.rego}; CIS 2.2/2.3 \\
 \hline
-Deploy fora da \textit{whitelist} de regiões & OPA & Pipeline interrompida & \texttt{region\_whitelist.rego}; base para LGPD \\
+Deploy fora da \textit{whitelist} de regiões & OPA & Pipeline interrompida & \pathtt{region\_whitelist.rego}; base para LGPD \\
 \hline
-Família de instância proibida em \texttt{dev} & OPA & Pipeline interrompida & \texttt{finops\_instance\_types.rego} \\
+Família de instância proibida em \texttt{dev} & OPA & Pipeline interrompida & \pathtt{finops\_instance\_types.rego} \\
 \hline
-Segredo (AWS key) em \texttt{.env} & Gitleaks (+ ggshield) & \texttt{gate 1} bloqueia o \textit{commit}/PR & \texttt{gitleaks-action@v2} com \texttt{.gitleaks.toml} \\
+Segredo (AWS key) em \texttt{.env} & Gitleaks (+ ggshield) & \texttt{gate 1} bloqueia o \textit{commit}/PR & \pathtt{gitleaks-action@v2} com \pathtt{.gitleaks.toml} \\
 \hline
 Dockerfile sem \texttt{USER} não-\textit{root} & Checkov (Dockerfile) & Pipeline interrompida no gate 2 & CKV\_DOCKER\_3; corrigido em ambas as PoC \\
 \hline
 Dockerfile sem \texttt{HEALTHCHECK} & Checkov (Dockerfile) & Pipeline interrompida & CKV\_DOCKER\_2; corrigido em ambas as PoC \\
 \hline
-Contêiner K8s \texttt{privileged=true} & OPA (K8s) & Pipeline interrompida & \texttt{no\_privileged\_containers.rego}; CIS K8s 5.2.1 \\
+Contêiner K8s \texttt{privileged=true} & OPA (K8s) & Pipeline interrompida & \pathtt{no\_privileged\_containers.rego}; CIS K8s 5.2.1 \\
 \hline
-Contêiner K8s sem \texttt{limits} & OPA (K8s) & Pipeline interrompida & \texttt{require\_resource\_limits.rego} \\
+Contêiner K8s sem \texttt{limits} & OPA (K8s) & Pipeline interrompida & \pathtt{require\_resource\_limits.rego} \\
 \hline
-Imagem K8s com tag \texttt{:latest} & OPA (K8s) & Pipeline interrompida & \texttt{no\_latest\_tag.rego} \\
+Imagem K8s com tag \texttt{:latest} & OPA (K8s) & Pipeline interrompida & \pathtt{no\_latest\_tag.rego} \\
 \hline
 \end{tabular}
 \fonte{Elaborado pelo autor a partir de \citeonline{PocDevSecOpsAWS2026, PocDevSecOps2026}}

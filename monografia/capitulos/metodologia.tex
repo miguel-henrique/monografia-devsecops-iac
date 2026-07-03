@@ -77,39 +77,40 @@ Diferentemente de uma inspeção genérica, cada configuração testada tem \tex
 \caption{Casos de teste controlados executados nas Provas de Conceito}
 \label{tab:testes-controlados}
 \renewcommand{\arraystretch}{1.3}
-\begin{tabular}{|p{4.2cm}|p{3.1cm}|p{4.0cm}|p{3.2cm}|}
+\footnotesize
+\begin{tabular}{|L{4.2cm}|L{2.6cm}|L{4.4cm}|L{2.8cm}|}
 \hline
 \textbf{Cenário de teste} & \textbf{Controle} & \textbf{Política aplicada} & \textbf{Ferramenta} \\
 \hline
-Bucket S3 sem SSE (\textit{aws\_s3\_bucket} sem \texttt{server\_side\_encryption\_configuration}) & CIS AWS 2.1.1 & \texttt{deny\_unencrypted\_s3.rego}; CKV\_AWS\_19 & OPA + Checkov \\
+Bucket S3 sem SSE (\textit{aws\_s3\_bucket} sem \pathtt{server\_side\_encryption\_configuration}) & CIS AWS 2.1.1 & \pathtt{deny\_unencrypted\_s3.rego}; CKV\_AWS\_19 & OPA + Checkov \\
 \hline
-Bucket S3 sem \texttt{public\_access\_block} & CIS AWS 2.1.5 & \texttt{deny\_unencrypted\_s3.rego} & OPA + Checkov \\
+Bucket S3 sem \pathtt{public\_access\_block} & CIS AWS 2.1.5 & \pathtt{deny\_unencrypted\_s3.rego} & OPA + Checkov \\
 \hline
-\textit{Security Group} liberando SSH (22) para \texttt{0.0.0.0/0} & CIS AWS 5.2 & \texttt{deny\_public\_ssh.rego}; CKV\_AWS\_24 & OPA + Checkov \\
+\textit{Security Group} liberando SSH (22) para \texttt{0.0.0.0/0} & CIS AWS 5.2 & \pathtt{deny\_public\_ssh.rego}; CKV\_AWS\_24 & OPA + Checkov \\
 \hline
-\textit{Security Group} liberando RDP (3389) para \texttt{0.0.0.0/0} & CIS AWS 5.2 & \texttt{deny\_public\_ssh.rego} & OPA \\
+\textit{Security Group} liberando RDP (3389) para \texttt{0.0.0.0/0} & CIS AWS 5.2 & \pathtt{deny\_public\_ssh.rego} & OPA \\
 \hline
-Instância EC2 sem IMDSv2 & CIS AWS 5.6 & \texttt{enforce\_imdsv2.rego} & OPA \\
+Instância EC2 sem IMDSv2 & CIS AWS 5.6 & \pathtt{enforce\_imdsv2.rego} & OPA \\
 \hline
-Política IAM concedendo \texttt{Action="*"} + \texttt{Resource="*"} & NIST SP 800-53 AC-6 & \texttt{deny\_admin\_iam.rego} & OPA \\
+Política IAM concedendo \texttt{Action="*"} + \texttt{Resource="*"} & NIST SP 800-53 AC-6 & \pathtt{deny\_admin\_iam.rego} & OPA \\
 \hline
-RDS/EBS sem criptografia em repouso & CIS AWS 2.3 / 2.2 & \texttt{deny\_unencrypted\_rds\_ebs.rego} & OPA \\
+RDS/EBS sem criptografia em repouso & CIS AWS 2.3 / 2.2 & \pathtt{deny\_unencrypted\_rds\_ebs.rego} & OPA \\
 \hline
-\textit{Deploy} fora da região permitida (\textit{Whitelist}) & Governança / LGPD & \texttt{region\_whitelist.rego} & OPA \\
+\textit{Deploy} fora da região permitida (\textit{Whitelist}) & Governança / LGPD & \pathtt{region\_whitelist.rego} & OPA \\
 \hline
-Instância de família proibida em ambiente \texttt{dev} & FinOps & \texttt{finops\_instance\_types.rego} & OPA \\
+Instância de família proibida em ambiente \texttt{dev} & FinOps & \pathtt{finops\_instance\_types.rego} & OPA \\
 \hline
-Segredo (chave AWS) versionado em \texttt{.env} & OWASP -- \textit{Cryptographic Failures} & Regras padrão + \texttt{.gitleaks.toml} & Gitleaks + GitGuardian \\
+Segredo (chave AWS) versionado em \texttt{.env} & OWASP -- \textit{Cryptographic Failures} & Regras padrão + \pathtt{.gitleaks.toml} & Gitleaks + GitGuardian \\
 \hline
 Dockerfile sem \texttt{USER} não-\textit{root} & CIS Docker 4.1 & CKV\_DOCKER\_3 & Checkov (Dockerfile) \\
 \hline
 Dockerfile sem \texttt{HEALTHCHECK} & Boas práticas / CIS Docker 4.6 & CKV\_DOCKER\_2 & Checkov (Dockerfile) \\
 \hline
-Contêiner privileged=true & CIS K8s 5.2.1 & \texttt{no\_privileged\_containers.rego} & OPA (K8s) \\
+Contêiner privileged=true & CIS K8s 5.2.1 & \pathtt{no\_privileged\_containers.rego} & OPA (K8s) \\
 \hline
-Contêiner sem \texttt{resources.limits} & CIS K8s 5.x / FinOps & \texttt{require\_resource\_limits.rego} & OPA (K8s) \\
+Contêiner sem \texttt{resources.limits} & CIS K8s 5.x / FinOps & \pathtt{require\_resource\_limits.rego} & OPA (K8s) \\
 \hline
-Imagem com tag \texttt{:latest} & Boas práticas & \texttt{no\_latest\_tag.rego} & OPA (K8s) \\
+Imagem com tag \texttt{:latest} & Boas práticas & \pathtt{no\_latest\_tag.rego} & OPA (K8s) \\
 \hline
 \end{tabular}
 \fonte{Elaborado pelo autor}

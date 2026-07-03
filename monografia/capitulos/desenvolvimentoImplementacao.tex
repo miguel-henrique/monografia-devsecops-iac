@@ -37,6 +37,23 @@ Como observado no diagrama, a arquitetura foca na \textbf{visibilidade total} da
 \section{Cenário 1 -- PoC em Nuvem AWS}
 \label{sec:poc-aws}
 
+A PoC AWS materializa o modelo em uma conta gerenciada pelo autor, com governança centralizada via AWS Organizations e provisionamento 100\% declarativo em Terraform conforme demonstrado na Figura~\ref{fig:arquitetura-aws}. 
+
+\begin{figure}[!ht]
+    \caption{Arquitetura de referência da PoC AWS: AWS Organizations com SCPs de governança, VPC (10.20.0.0/16) segmentada em três \textit{tiers} (\textit{public}, \textit{private-app}, \textit{private-db}), EKS com IRSA e \textit{envelope encryption} via KMS, RDS PostgreSQL multi-AZ criptografado, \textit{shared services} (ECR, S3, KMS, Secrets Manager, IAM) e camada de auditoria contínua (CloudTrail, AWS Config, GuardDuty, Security Hub). O fluxo de credenciais entre GitHub Actions e a AWS é \textit{keyless} via OIDC.}
+    \label{fig:arquitetura-aws}
+    \centering
+    % Extensao omitida propositalmente: se houver .pdf, o pdflatex prefere a
+    % versao vetorial; caso contrario usa a .png. Basta exportar o mesmo nome
+    % do drawio como PDF para migrar sem alterar este arquivo.
+    \includegraphics[width=\textwidth]{Arquivos/figuras/Figura_Arquitetura_PoC_DevSecOps_Arquitetura_AWS}
+    \fonte{Elaborado pelo autor com base em \citeonline{PocDevSecOpsAWS2026}.}
+\end{figure}
+
+A Figura~\ref{fig:arquitetura-aws} apresenta a \textbf{arquitetura de referência} adotada: da entrada de tráfego (usuários finais) até a persistência (RDS PostgreSQL), passando pela segmentação em três \textit{tiers} de sub-rede, pela integração \textit{keyless} com GitHub Actions via OIDC e pela camada transversal de observabilidade (CloudTrail, AWS Config, GuardDuty, Security Hub).
+
+Os números indicados na figura correspondem ao caminho seguido por uma requisição do usuário final e ao fluxo paralelo de credenciais/imagens: (1) o tráfego HTTPS entra pelo Internet Gateway e é inspecionado pelo AWS WAFv2 (regras OWASP + \textit{rate limit}) antes de chegar (2) ao \textit{Application Load Balancer} nas sub-redes públicas; (3) o ALB encaminha o tráfego interno para os \textit{pods} do EKS nas sub-redes privadas de aplicação, que se conectam (4) ao RDS PostgreSQL em sub-redes privadas de dados via TLS. Do lado do fluxo \textit{keyless}, (5) os \textit{pods} obtêm credenciais efêmeras da AWS por meio do IRSA (\textit{IAM Roles for Service Accounts}); (6) o GitHub Actions se autentica na AWS via OIDC, sem chaves de longa duração no repositório; e (7) as imagens de contêiner produzidas na esteira são publicadas no ECR e, na sequência, consumidas pelo EKS. Todo o perímetro é envolvido por uma camada de \textbf{governança e auditoria}: SCPs no nível da \textit{Organization}, VPC Flow Logs habilitados, CloudTrail multi-região e Security Hub agregando os \textit{findings} do AWS Config (CIS Conformance Pack) e do GuardDuty. As próximas subseções detalham cada uma dessas camadas, começando pelos recursos provisionados.
+
 \subsection{Recursos AWS provisionados}
 
 Para materializar o modelo em um cenário produtivo, a PoC AWS provisiona uma infraestrutura completa que reflete padrões corporativos, apoiada nos controles do CIS AWS Foundations~\citeonline{CIS2024AWS}:
@@ -158,7 +175,7 @@ A Figura~\ref{fig:vpc-console} apresenta a visualização, no console AWS, da VP
 
 \subsection{Armazenamento seguro: buckets S3 com controles nativos}
 
-O módulo \texttt{storage} materializa quatro controles do CIS AWS Foundations em uma única definição declarativa: (i) \texttt{aws\_s3\_bucket\_public\_access\_block} bloqueando qualquer forma de acesso público (CIS 2.1.5); (ii) \texttt{aws\_s3\_bucket\_server\_side\_encryption\_configuration} com SSE-KMS obrigatório (CIS 2.1.1); (iii) \texttt{aws\_s3\_bucket\_versioning} para objetos sensíveis; e (iv) políticas de bucket que negam tráfego não criptografado (\texttt{aws:SecureTransport = false}).
+O módulo \texttt{storage} materializa quatro controles do CIS AWS Foundations em uma única definição declarativa: (i) \pathtt{aws\_s3\_bucket\_public\_access\_block} bloqueando qualquer forma de acesso público (CIS 2.1.5); (ii) \pathtt{aws\_s3\_bucket\_server\_side\_encryption\_configuration} com SSE-KMS obrigatório (CIS 2.1.1); (iii) \pathtt{aws\_s3\_bucket\_versioning} para objetos sensíveis; e (iv) políticas de bucket que negam tráfego não criptografado (\texttt{aws:SecureTransport = false}).
 
 \begin{lstlisting}[language=HCL,caption={Configuração declarativa de segurança para buckets S3 (\texttt{terraform/modules/storage/main.tf}).},label={lst:aws-s3}]
 resource "aws_s3_bucket_public_access_block" "this" {
@@ -189,7 +206,17 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 \subsection{Esteira DevSecOps em GitHub Actions}
 \label{sec:pipeline-aws}
 
-A pipeline da PoC AWS (arquivo \texttt{.github/workflows/security-scan.yml}) implementa os cinco \textit{quality gates} descritos na Seção~\ref{sec:modelo}. Cada \textit{job} depende do anterior (\texttt{needs:}), o que garante o comportamento \textit{Fail-Fast}: se \textbf{secrets} falhar, os demais nem chegam a executar. O Quadro~\ref{lst:aws-pipeline} apresenta os \textit{jobs} de detecção de segredos e de análise estática de Terraform.
+A esteira da PoC AWS é organizada em quatro camadas temporais bem definidas, cada uma acionando \textit{gates} de segurança distintos e complementares. A Figura~\ref{fig:pipeline-aws} apresenta essa organização em uma perspectiva \textit{shift-left}: a maior parte dos controles é executada \textbf{antes} do código chegar à AWS -- localmente no ambiente do desenvolvedor (segundos) e na CI a cada \textit{pull request} (minutos) --, restando à camada de \textit{runtime} atuar como \textit{guardrail} contínuo para desvios que porventura escapem das camadas anteriores.
+
+\begin{figure}[!ht]
+    \caption{Pipeline DevSecOps da PoC AWS organizada em quatro camadas: (1) \textit{Pre-commit local} -- \textit{gates} executados em segundos na máquina do desenvolvedor (gitleaks, \texttt{terraform fmt/validate/tflint}, Checkov, Conftest/OPA, hadolint, Trivy \textit{filesystem}); (2) \textit{GitHub Actions CI} -- \textit{gates} executados em minutos a cada \textit{pull request} (\texttt{security-scan}, \texttt{terraform-plan}, \texttt{container-build}, \texttt{terraform-apply}, \texttt{k8s-deploy}); (3) \textit{Runtime AWS} -- \textit{guardrails} contínuos (SCPs, AWS Config + CIS Conformance Pack, GuardDuty, Security Hub, OPA Gatekeeper no cluster EKS, CloudTrail multi-região); e (4) \textit{Resultado mensurável} -- indicadores de conformidade e ganho operacional face a um cenário sem \textit{shift-left}.}
+    \label{fig:pipeline-aws}
+    \centering
+    \includegraphics[width=\textwidth]{Arquivos/figuras/Figura_Pipeline_PoC_DevSecOps_AWS}
+    \fonte{Elaborado pelo autor com base em \citeonline{PocDevSecOpsAWS2026}.}
+\end{figure}
+
+A materialização dessas camadas ocorre em um único arquivo YAML da CI (\texttt{.github/workflows/security-scan.yml}), que implementa os cinco \textit{quality gates} descritos na Seção~\ref{sec:modelo}. Cada \textit{job} depende do anterior (\texttt{needs:}), o que garante o comportamento \textit{Fail-Fast}: se \textbf{secrets} falhar, os demais nem chegam a executar. O Quadro~\ref{lst:aws-pipeline} apresenta os \textit{jobs} de detecção de segredos e de análise estática de Terraform.
 
 \begin{lstlisting}[language=yaml,caption={Trecho da pipeline \texttt{security-scan.yml} (PoC AWS): detecção de segredos com Gitleaks (obrigatório) e ggshield (opcional), seguida de \texttt{fmt}, \texttt{validate}, \texttt{tflint} e \texttt{Checkov} em matriz de ambientes.},label={lst:aws-pipeline}]
 jobs:

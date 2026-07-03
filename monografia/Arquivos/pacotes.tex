@@ -65,6 +65,25 @@
 \usepackage{makecell}
 \usepackage{tabularx}
 
+% -------------------------------------------------------------
+% Utilitarios de layout: quebras em identificadores longos e colunas
+% -------------------------------------------------------------
+% \pathtt{...} renderiza como \texttt mas permite quebra de linha em
+% \_  .  /  (pontos comuns em nomes de arquivos e recursos IaC).
+% Uso: \pathtt{deny\_unencrypted\_s3.rego}  <-- mesma sintaxe do \texttt
+\newcommand{\pathtt}[1]{{%
+  \begingroup
+    \renewcommand{\_}{\char`\_\allowbreak}%
+    \def\.{.\allowbreak}%
+    \def\/{/\allowbreak}%
+    \texttt{#1}%
+  \endgroup
+}}
+
+% Tipo de coluna 'L' = paragrafo com \raggedright (evita overfull hbox
+% em celulas com identificadores longos). Uso: |L{4.2cm}|L{3.1cm}|...
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
 
 %\usepackage{fancyhdr}
 %\pagestyle{fancy}
