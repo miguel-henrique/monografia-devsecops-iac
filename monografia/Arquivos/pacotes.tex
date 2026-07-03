@@ -73,6 +73,11 @@
 % entre subsecoes, use \FloatBarrier manualmente onde necessario.
 \usepackage[section]{placeins}
 
+% needspace: permite exigir uma altura minima de espaco na pagina atual
+% antes de comecar um bloco (ex.: tabela grande). Se nao houver, quebra
+% para a proxima pagina. Uso: \needspace{18\baselineskip} antes do bloco.
+\usepackage{needspace}
+
 % Torna o LaTeX mais tolerante ao empurrar floats: permite ate 90% da
 % pagina com float no topo/rodape e apenas 5% de texto minimo (default
 % 70/30/20), o que evita floats "presos" no fim de secoes longas.

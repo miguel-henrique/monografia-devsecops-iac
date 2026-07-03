@@ -1,6 +1,6 @@
-\chapter{Desenvolvimento e Implementação}
+\chapter{Modelo Proposto e Provas de Conceito}
 
-Este capítulo apresenta a materialização do modelo proposto por meio de duas Provas de Conceito (PoC) complementares. A escolha por duas PoC responde a dois objetivos distintos e igualmente relevantes:
+Este capítulo apresenta a materialização do modelo proposto por meio de duas Provas de Conceito (PoC) complementares. O modelo conceitual é formalizado na Seção~\ref{sec:modelo} e, em seguida, instanciado em dois substratos técnicos distintos que se validam mutuamente. A escolha por duas PoC responde a dois objetivos distintos e igualmente relevantes:
 
 \begin{enumerate}
     \item \textbf{PoC AWS} (Seção~\ref{sec:poc-aws})~\citeonline{PocDevSecOpsAWS2026}: demonstra o modelo em um \textbf{ambiente corporativo real} de nuvem pública, com serviços gerenciados, federação de identidade, múltiplos ambientes e auditoria contínua. Ela representa o cenário para o qual o modelo foi originalmente concebido.
@@ -37,7 +37,7 @@ Como observado no diagrama, a arquitetura foca na \textbf{visibilidade total} da
 \section{Cenário 1 -- PoC em Nuvem AWS}
 \label{sec:poc-aws}
 
-A PoC AWS materializa o modelo em uma conta gerenciada pelo autor, com governança centralizada via AWS Organizations e provisionamento 100\% declarativo em Terraform conforme demonstrado na Figura~\ref{fig:arquitetura-aws}. 
+A PoC AWS materializa o modelo em uma conta gerenciada pelo autor, com governança centralizada via AWS Organizations e provisionamento 100\% declarativo em Terraform, conforme demonstrado na Figura~\ref{fig:arquitetura-aws}.
 
 \begin{figure}[!ht]
     \caption{Arquitetura de referência da PoC AWS: AWS Organizations com SCPs de governança, VPC (10.20.0.0/16) segmentada em três \textit{tiers} (\textit{public}, \textit{private-app}, \textit{private-db}), EKS com IRSA e \textit{envelope encryption} via KMS, RDS PostgreSQL multi-AZ criptografado, \textit{shared services} (ECR, S3, KMS, Secrets Manager, IAM) e camada de auditoria contínua (CloudTrail, AWS Config, GuardDuty, Security Hub). O fluxo de credenciais entre GitHub Actions e a AWS é \textit{keyless} via OIDC.}
@@ -207,10 +207,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 \subsection{Esteira DevSecOps em GitHub Actions}
 \label{sec:pipeline-aws}
 
-A esteira da PoC AWS é organizada em quatro camadas temporais bem definidas, cada uma acionando \textit{gates} de segurança distintos e complementares. A Figura~\ref{fig:pipeline-aws} apresenta essa organização em uma perspectiva \textit{shift-left}: a maior parte dos controles é executada \textbf{antes} do código chegar à AWS -- localmente no ambiente do desenvolvedor (segundos) e na CI a cada \textit{pull request} (minutos) --, restando à camada de \textit{runtime} atuar como \textit{guardrail} contínuo para desvios que porventura escapem das camadas anteriores.
+A esteira da PoC AWS é organizada em quatro camadas temporais bem definidas, cada uma acionando \textit{gates} de segurança distintos e complementares. A Figura~\ref{fig:pipeline-aws} apresenta essa organização em uma perspectiva \textit{Shift-Left}: a maior parte dos controles é executada \textbf{antes} do código chegar à AWS -- localmente no ambiente do desenvolvedor (segundos) e na CI a cada \textit{pull request} (minutos) --, restando à camada de \textit{runtime} atuar como \textit{guardrail} contínuo para desvios que porventura escapem das camadas anteriores.
 
 \begin{figure}[!htbp]
-    \caption[Pipeline DevSecOps da PoC AWS em quatro camadas.]{Pipeline DevSecOps da PoC AWS organizada em quatro camadas: (1) \textit{Pre-commit local} -- \textit{gates} executados em segundos na máquina do desenvolvedor (gitleaks, \texttt{terraform fmt/validate/tflint}, Checkov, Conftest/OPA, hadolint, Trivy \textit{filesystem}); (2) \textit{GitHub Actions CI} -- \textit{gates} executados em minutos a cada \textit{pull request} (\texttt{security-scan}, \texttt{terraform-plan}, \texttt{container-build}, \texttt{terraform-apply}, \texttt{k8s-deploy}); (3) \textit{Runtime AWS} -- \textit{guardrails} contínuos (SCPs, AWS Config + CIS Conformance Pack, GuardDuty, Security Hub, OPA Gatekeeper no cluster EKS, CloudTrail multi-região); e (4) \textit{Resultado mensurável} -- indicadores de conformidade e ganho operacional face a um cenário sem \textit{shift-left}.}
+    \caption[Pipeline DevSecOps da PoC AWS em quatro camadas.]{Pipeline DevSecOps da PoC AWS organizada em quatro camadas: (1) \textit{Pre-commit local} -- \textit{gates} executados em segundos na máquina do desenvolvedor (gitleaks, \texttt{terraform fmt/validate/tflint}, Checkov, Conftest/OPA, hadolint, Trivy \textit{filesystem}); (2) \textit{GitHub Actions CI} -- \textit{gates} executados em minutos a cada \textit{pull request} (\texttt{security-scan}, \texttt{terraform-plan}, \texttt{container-build}, \texttt{terraform-apply}, \texttt{k8s-deploy}); (3) \textit{Runtime AWS} -- \textit{guardrails} contínuos (SCPs, AWS Config + CIS Conformance Pack, GuardDuty, Security Hub, OPA Gatekeeper no cluster EKS, CloudTrail multi-região); e (4) \textit{Resultado mensurável} -- indicadores de conformidade e ganho operacional face a um cenário sem \textit{Shift-Left}.}
     \label{fig:pipeline-aws}
     \centering
     \includegraphics[width=\textwidth]{Arquivos/figuras/Figura_Pipeline_PoC_DevSecOps_AWS}
@@ -316,7 +316,7 @@ port_in_range(from, to, port) if {
 }
 \end{lstlisting}
 
-Outra política, apresentada no Quadro~\ref{lst:opa-finops}, é dedicada à governança financeira (\textit{FinOps}). Ela bloqueia famílias de instância caras (GPU, memória extra-alta, \textit{dedicated hosts} e tamanhos $\geq$ \texttt{24xlarge}) em ambientes não-produtivos, aplicando o conceito de \textit{governance-as-code}~\citeonline{OPA2024}. Trata-se de uma extensão do princípio de \textit{shift-left} para uma dimensão que raramente aparece em \textit{benchmarks} tradicionais de segurança -- custo operacional -- mas que é igualmente auditável e passível de bloqueio automático antes do \texttt{terraform apply}, evitando surpresas na fatura sem depender de vigilância humana:
+Outra política, apresentada no Quadro~\ref{lst:opa-finops}, é dedicada à governança financeira (\textit{FinOps}). Ela bloqueia famílias de instância caras (GPU, memória extra-alta, \textit{dedicated hosts} e tamanhos $\geq$ \texttt{24xlarge}) em ambientes não-produtivos, aplicando o conceito de \textit{governance-as-code}~\citeonline{OPA2024}. Trata-se de uma extensão do princípio de \textit{Shift-Left} para uma dimensão que raramente aparece em \textit{benchmarks} tradicionais de segurança -- custo operacional -- mas que é igualmente auditável e passível de bloqueio automático antes do \texttt{terraform apply}, evitando surpresas na fatura sem depender de vigilância humana:
 
 \begin{lstlisting}[language=Rego,caption={Política OPA/Rego \texttt{finops\_instance\_types.rego}: bloqueia \textit{instance types} caros em ambientes não-produtivos.},label={lst:opa-finops}]
 package terraform.finops

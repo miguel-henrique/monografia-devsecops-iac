@@ -1,7 +1,7 @@
 \chapter{Discussões e Conclusões}
 \label{cap:discussao}
 
-Este capítulo, encerra a monografia consolidando os resultados observados na execução das duas Provas de Conceito (PoC), discute suas implicações à luz das perguntas de pesquisa formuladas no Capítulo~1 e apresenta as conclusões finais do trabalho, além de trabalhos futuros. Diferentemente da versão originalmente submetida à banca -- que separava esses dois momentos --, optou-se por unificá-los para evitar duplicação de argumentos e para tornar a exposição mais direta.
+Este capítulo encerra a monografia consolidando os resultados observados na execução das duas Provas de Conceito (PoC), discute suas implicações à luz das perguntas de pesquisa formuladas no Capítulo~1 e apresenta as conclusões finais do trabalho, além de trabalhos futuros. Diferentemente da versão originalmente submetida à banca -- que separava esses dois momentos --, optou-se por unificá-los para evitar duplicação de argumentos e para tornar a exposição mais direta.
 
 \section{Resumo dos Casos de Teste Executados}
 \label{sec:resumo-testes}
@@ -58,15 +58,18 @@ Todos os casos elencados resultaram em interrupção correta da esteira. Em nenh
 \section{Métricas Consolidadas}
 \label{sec:metricas-resultado}
 
-Retomando as métricas definidas na Seção~\ref{sec:metricas}, os principais achados foram, sintetizados também na Figura~\ref{fig:pipeline}:
+Retomando as métricas definidas na Seção~\ref{sec:metricas}, os principais achados foram, sintetizados também na Figura~\ref{fig:pipeline}.
 
-\begin{figure}[!htbp]
+\needspace{18\baselineskip}
+\begin{figure}[!ht]
     \caption{Execução bem-sucedida da esteira DevSecOps integrada no Git, demonstrando o encadeamento sequencial de estágios automatizados (\textit{Plan}, \textit{Checkov} e \textit{Apply}) e a viabilidade prática do modelo.}
     \label{fig:pipeline}
     \centering
     \includegraphics[width=0.8\textwidth]{Arquivos/figuras/Figura_DevSecOps_Pipeline_GitlabPipeline.png}
     \fonte{Elaborado pelo autor}
 \end{figure}
+
+\FloatBarrier
 
 \begin{itemize}
     \item \textbf{Taxa de detecção precoce:} 100\% dos casos deliberadamente inseguros foram detectados antes de qualquer \texttt{terraform apply} ou \textit{deploy} em Kubernetes. Isso é possível porque a esteira executa as verificações contra o \texttt{plan} (não contra o estado aplicado) e contra o código-fonte.
@@ -171,7 +174,7 @@ Retomando as perguntas formuladas no Capítulo~1, os resultados permitem as segu
 
     \item \textbf{Escalabilidade e maturidade:} o modelo baseado em módulos do Terraform e políticas em Rego (OPA) provou-se escalável. A modularização permite replicar padrões validados para diferentes unidades de negócio ou níveis de complexidade, garantindo que o crescimento da infraestrutura não implique crescimento proporcional do risco.
 
-    \item \textbf{Transposição AWS $\rightarrow$ local:} a existência das duas PoC evidencia que o \textit{esqueleto} conceitual (Shift-Left + Policy-as-Code + \textit{gates} Fail-Fast) é transponível entre nuvem pública e ambiente local, com as devidas ressalvas: controles específicos de nuvem gerenciada não têm equivalente 1:1 em Docker, mas o \textbf{método} e a \textbf{cultura} são idênticos.
+    \item \textbf{Transposição AWS $\rightarrow$ local:} a existência das duas PoC evidencia que o \textit{esqueleto} conceitual (\textit{Shift-Left} + \textit{Policy-as-Code} + \textit{gates} \textit{Fail-Fast}) é transponível entre nuvem pública e ambiente local, com as devidas ressalvas: controles específicos de nuvem gerenciada não têm equivalente 1:1 em Docker, mas o \textbf{método} e a \textbf{cultura} são idênticos.
 \end{itemize}
 
 \section{Conclusões}
