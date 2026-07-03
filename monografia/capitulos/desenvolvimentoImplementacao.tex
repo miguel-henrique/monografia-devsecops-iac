@@ -69,7 +69,7 @@ Para materializar o modelo em um cenário produtivo, a PoC AWS provisiona uma in
     \item \textbf{OIDC federado} para GitHub Actions, dispensando \texttt{AWS\_ACCESS\_KEY} de longa duração no repositório.
 \end{itemize}
 
-O trecho a seguir mostra a composição do ambiente \texttt{dev} da PoC AWS, no qual cada módulo é uma unidade coesa e isolada. Observa-se que a rede é a primeira dependência, seguida por segurança, IAM, dados e, por fim, computação (EKS).
+O Quadro~\ref{lst:aws-envdev} mostra a composição do ambiente \texttt{dev} da PoC AWS, no qual cada módulo é uma unidade coesa e isolada. Observa-se que a rede é a primeira dependência, seguida por segurança, IAM, dados e, por fim, computação (EKS) -- a mesma ordem de resolução indicada no cabeçalho do quadro. Esse encadeamento explicita as fronteiras de responsabilidade entre módulos e serve como \textit{blueprint} reutilizável para o ambiente \texttt{prod}, que difere apenas em parâmetros (CIDR, tamanho dos \textit{node groups}, retenção de \textit{logs}), preservando exatamente a mesma topologia de segurança.
 
 \begin{lstlisting}[language=HCL,caption={Composição do ambiente \texttt{dev} na PoC AWS (\texttt{terraform/environments/dev/main.tf}). Ordem de resolução: KMS $\rightarrow$ Networking $\rightarrow$ IAM $\rightarrow$ Security $\rightarrow$ Storage $\rightarrow$ Secrets $\rightarrow$ Database $\rightarrow$ EKS.},label={lst:aws-envdev}]
 module "kms" {
@@ -173,9 +173,10 @@ A Figura~\ref{fig:vpc-console} apresenta a visualização, no console AWS, da VP
     \fonte{Elaborado pelo autor}
 \end{figure}
 
+\FloatBarrier
 \subsection{Armazenamento seguro: buckets S3 com controles nativos}
 
-O módulo \texttt{storage} materializa quatro controles do CIS AWS Foundations em uma única definição declarativa: (i) \pathtt{aws\_s3\_bucket\_public\_access\_block} bloqueando qualquer forma de acesso público (CIS 2.1.5); (ii) \pathtt{aws\_s3\_bucket\_server\_side\_encryption\_configuration} com SSE-KMS obrigatório (CIS 2.1.1); (iii) \pathtt{aws\_s3\_bucket\_versioning} para objetos sensíveis; e (iv) políticas de bucket que negam tráfego não criptografado (\texttt{aws:SecureTransport = false}).
+O módulo \texttt{storage} materializa quatro controles do CIS AWS Foundations em uma única definição declarativa: (i) \pathtt{aws\_s3\_bucket\_public\_access\_block} bloqueando qualquer forma de acesso público (CIS 2.1.5); (ii) \pathtt{aws\_s3\_bucket\_server\_side\_encryption\_configuration} com SSE-KMS obrigatório (CIS 2.1.1); (iii) \pathtt{aws\_s3\_bucket\_versioning} para objetos sensíveis; e (iv) políticas de bucket que negam tráfego não criptografado (\texttt{aws:SecureTransport = false}). O Quadro~\ref{lst:aws-s3} apresenta os dois primeiros controles, aplicados de forma uniforme a todos os \textit{buckets} do ambiente por meio do \texttt{for\_each} sobre \texttt{local.buckets} -- eliminando a possibilidade de um \textit{bucket} ser esquecido ou ficar fora do padrão.
 
 \begin{lstlisting}[language=HCL,caption={Configuração declarativa de segurança para buckets S3 (\texttt{terraform/modules/storage/main.tf}).},label={lst:aws-s3}]
 resource "aws_s3_bucket_public_access_block" "this" {
@@ -208,8 +209,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 
 A esteira da PoC AWS é organizada em quatro camadas temporais bem definidas, cada uma acionando \textit{gates} de segurança distintos e complementares. A Figura~\ref{fig:pipeline-aws} apresenta essa organização em uma perspectiva \textit{shift-left}: a maior parte dos controles é executada \textbf{antes} do código chegar à AWS -- localmente no ambiente do desenvolvedor (segundos) e na CI a cada \textit{pull request} (minutos) --, restando à camada de \textit{runtime} atuar como \textit{guardrail} contínuo para desvios que porventura escapem das camadas anteriores.
 
-\begin{figure}[!ht]
-    \caption{Pipeline DevSecOps da PoC AWS organizada em quatro camadas: (1) \textit{Pre-commit local} -- \textit{gates} executados em segundos na máquina do desenvolvedor (gitleaks, \texttt{terraform fmt/validate/tflint}, Checkov, Conftest/OPA, hadolint, Trivy \textit{filesystem}); (2) \textit{GitHub Actions CI} -- \textit{gates} executados em minutos a cada \textit{pull request} (\texttt{security-scan}, \texttt{terraform-plan}, \texttt{container-build}, \texttt{terraform-apply}, \texttt{k8s-deploy}); (3) \textit{Runtime AWS} -- \textit{guardrails} contínuos (SCPs, AWS Config + CIS Conformance Pack, GuardDuty, Security Hub, OPA Gatekeeper no cluster EKS, CloudTrail multi-região); e (4) \textit{Resultado mensurável} -- indicadores de conformidade e ganho operacional face a um cenário sem \textit{shift-left}.}
+\begin{figure}[!htbp]
+    \caption[Pipeline DevSecOps da PoC AWS em quatro camadas.]{Pipeline DevSecOps da PoC AWS organizada em quatro camadas: (1) \textit{Pre-commit local} -- \textit{gates} executados em segundos na máquina do desenvolvedor (gitleaks, \texttt{terraform fmt/validate/tflint}, Checkov, Conftest/OPA, hadolint, Trivy \textit{filesystem}); (2) \textit{GitHub Actions CI} -- \textit{gates} executados em minutos a cada \textit{pull request} (\texttt{security-scan}, \texttt{terraform-plan}, \texttt{container-build}, \texttt{terraform-apply}, \texttt{k8s-deploy}); (3) \textit{Runtime AWS} -- \textit{guardrails} contínuos (SCPs, AWS Config + CIS Conformance Pack, GuardDuty, Security Hub, OPA Gatekeeper no cluster EKS, CloudTrail multi-região); e (4) \textit{Resultado mensurável} -- indicadores de conformidade e ganho operacional face a um cenário sem \textit{shift-left}.}
     \label{fig:pipeline-aws}
     \centering
     \includegraphics[width=\textwidth]{Arquivos/figuras/Figura_Pipeline_PoC_DevSecOps_AWS}
@@ -217,6 +218,8 @@ A esteira da PoC AWS é organizada em quatro camadas temporais bem definidas, ca
 \end{figure}
 
 A materialização dessas camadas ocorre em um único arquivo YAML da CI (\texttt{.github/workflows/security-scan.yml}), que implementa os cinco \textit{quality gates} descritos na Seção~\ref{sec:modelo}. Cada \textit{job} depende do anterior (\texttt{needs:}), o que garante o comportamento \textit{Fail-Fast}: se \textbf{secrets} falhar, os demais nem chegam a executar. O Quadro~\ref{lst:aws-pipeline} apresenta os \textit{jobs} de detecção de segredos e de análise estática de Terraform.
+
+\FloatBarrier
 
 \begin{lstlisting}[language=yaml,caption={Trecho da pipeline \texttt{security-scan.yml} (PoC AWS): detecção de segredos com Gitleaks (obrigatório) e ggshield (opcional), seguida de \texttt{fmt}, \texttt{validate}, \texttt{tflint} e \texttt{Checkov} em matriz de ambientes.},label={lst:aws-pipeline}]
 jobs:
@@ -276,7 +279,7 @@ Duas decisões merecem destaque:
 
 \subsection{Policy-as-Code: OPA/Rego contra o \texttt{terraform plan}}
 
-Diferentemente do Checkov -- que aplica regras genéricas ao HCL --, o OPA analisa o \textbf{plano de execução} do Terraform já resolvido (o JSON de \texttt{terraform show}). Isso torna as políticas capazes de raciocinar sobre valores computados, dependências e o resultado final da alteração. A política a seguir bloqueia qualquer \textit{Security Group} que exponha SSH (porta 22) ou RDP (porta 3389) para \texttt{0.0.0.0/0}, cobrindo os formatos \texttt{aws\_vpc\_security\_group\_ingress\_rule} e \texttt{aws\_security\_group} (com \textit{ingress inline}).
+Diferentemente do Checkov -- que aplica regras genéricas ao HCL --, o OPA analisa o \textbf{plano de execução} do Terraform já resolvido (o JSON de \texttt{terraform show}). Isso torna as políticas capazes de raciocinar sobre valores computados, dependências e o resultado final da alteração. A política do Quadro~\ref{lst:opa-ssh} bloqueia qualquer \textit{Security Group} que exponha SSH (porta 22) ou RDP (porta 3389) para \texttt{0.0.0.0/0}, cobrindo os dois formatos suportados pelo \textit{provider} AWS: \texttt{aws\_vpc\_security\_group\_ingress\_rule} (recurso independente) e \texttt{aws\_security\_group} com blocos \texttt{ingress} \textit{inline}. Note que a mensagem retornada por \texttt{deny} referencia explicitamente o controle CIS AWS 5.2, o que aparece na saída do \texttt{conftest} e facilita a rastreabilidade entre política executada e norma auditável.
 
 \begin{lstlisting}[language=Rego,caption={Política OPA/Rego \texttt{deny\_public\_ssh.rego} (PoC AWS): bloqueio de SSH e RDP expostos à Internet, atendendo ao CIS AWS 5.2.},label={lst:opa-ssh}]
 package terraform.security
@@ -313,7 +316,7 @@ port_in_range(from, to, port) if {
 }
 \end{lstlisting}
 
-Outra política, dedicada à governança financeira (\textit{FinOps}), bloqueia famílias de instância caras em ambientes não-produtivos, aplicando o conceito de governança como código~\citeonline{OPA2024}:
+Outra política, apresentada no Quadro~\ref{lst:opa-finops}, é dedicada à governança financeira (\textit{FinOps}). Ela bloqueia famílias de instância caras (GPU, memória extra-alta, \textit{dedicated hosts} e tamanhos $\geq$ \texttt{24xlarge}) em ambientes não-produtivos, aplicando o conceito de \textit{governance-as-code}~\citeonline{OPA2024}. Trata-se de uma extensão do princípio de \textit{shift-left} para uma dimensão que raramente aparece em \textit{benchmarks} tradicionais de segurança -- custo operacional -- mas que é igualmente auditável e passível de bloqueio automático antes do \texttt{terraform apply}, evitando surpresas na fatura sem depender de vigilância humana:
 
 \begin{lstlisting}[language=Rego,caption={Política OPA/Rego \texttt{finops\_instance\_types.rego}: bloqueia \textit{instance types} caros em ambientes não-produtivos.},label={lst:opa-finops}]
 package terraform.finops
@@ -376,6 +379,8 @@ Diferentemente das ferramentas de análise de configuração, o GitGuardian espe
 
 Como o EKS (Kubernetes) é o \textit{workload}, aplicaram-se controles adicionais no plano do \textit{cluster}: \textit{NetworkPolicies} \textit{default-deny} com permissões explícitas para o tráfego desejado (CIS K8s 5.3) e políticas OPA que bloqueiam \textit{privileged containers} e \textit{privilege escalation} (CIS K8s 5.2.1/5.2.5).
 
+O Quadro~\ref{lst:k8s-netpol} apresenta a materialização da primeira dessas medidas. O primeiro manifesto (\texttt{default-deny-all}) fecha todo o tráfego de \textit{ingress} e \textit{egress} do \textit{namespace} \texttt{app}; a partir dele, o segundo manifesto (\texttt{allow-backend-egress}) reabre explicitamente apenas o mínimo necessário: \textit{ingress} vindo do \textit{frontend nginx} na porta 8000 e \textit{egress} para o CIDR do RDS na porta 5432. Esse desenho garante que qualquer \textit{pod} novo, ao entrar no \textit{namespace}, esteja em \textit{deny-by-default} até que uma \textit{NetworkPolicy} específica autorize o seu tráfego -- eliminando a classe de vulnerabilidades em que \textit{workloads} não previstos passam a se comunicar livremente com serviços internos.
+
 \begin{lstlisting}[language=yaml,caption={\textit{NetworkPolicy} \textit{default-deny-all} no \textit{namespace} da aplicação (\texttt{k8s/manifests/50-network-policies.yaml}).},label={lst:k8s-netpol}]
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -404,6 +409,8 @@ spec:
     - to: [{ ipBlock: { cidr: 10.20.0.0/16 } }]
       ports: [{ protocol: TCP, port: 5432 }]
 \end{lstlisting}
+
+Complementarmente às \textit{NetworkPolicies}, o Quadro~\ref{lst:k8s-priv} apresenta uma política OPA que bloqueia \textit{containers privileged} e \textit{allowPrivilegeEscalation} -- padrões proscritos pelo CIS K8s Benchmark 5.2.1 e 5.2.5. A política é aplicada tanto na CI (via Conftest sobre os manifestos \texttt{.yaml}) quanto no \textit{runtime}, através do OPA Gatekeeper instalado no \textit{cluster}. Essa dupla execução -- CI + \textit{admission control} -- garante \textit{defense-in-depth}: mesmo que um manifesto seja aplicado fora da esteira (\textit{via kubectl apply} manual), o \textit{admission controller} intercepta e nega o recurso antes de ele existir no \textit{cluster}.
 
 \begin{lstlisting}[language=Rego,caption={Política OPA \texttt{no\_privileged\_containers.rego}: bloqueia \textit{privileged}, \textit{hostNetwork}, \textit{hostPID}, \textit{hostIPC} e \textit{allowPrivilegeEscalation}.},label={lst:k8s-priv}]
 package kubernetes.privileged
@@ -471,6 +478,8 @@ Observabilidade & CloudTrail / Config / Security Hub & \texttt{docker logs} + \t
 \end{tabular}
 \fonte{Elaborado pelo autor}
 \end{table}
+
+\FloatBarrier
 
 A Figura~\ref{fig:arquitetura-containers} ilustra a topologia local, na qual todos os contêineres estão conectados a uma única \texttt{docker\_network}, simulando uma VPC única.
 
@@ -620,9 +629,9 @@ Durante o desenvolvimento da PoC, o próprio Checkov identificou falhas de confo
 
 \subsection{Execução do ambiente}
 
-A PoC de contêineres foi projetada para ser provisionada com um único comando, o que reforça a proposta de reprodutibilidade:
+A PoC de contêineres foi projetada para ser provisionada com um único comando, o que reforça a proposta de reprodutibilidade. O Quadro~\ref{lst:docker-run} apresenta o roteiro completo -- do \textit{provisionamento} inicial ao \textit{teardown} --, viabilizando que qualquer avaliador reproduza integralmente o cenário local em minutos, a partir apenas de uma máquina com Docker e Terraform instalados.
 
-\begin{lstlisting}[language=bash,caption={Provisionamento e teardown completos da PoC local.}]
+\begin{lstlisting}[language=bash,caption={Provisionamento e teardown completos da PoC local.},label={lst:docker-run}]
 # Sobe todo o ambiente (Terraform + Docker + Checkov)
 ./dev-up.sh
 

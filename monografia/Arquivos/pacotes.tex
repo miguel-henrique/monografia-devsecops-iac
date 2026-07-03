@@ -66,6 +66,27 @@
 \usepackage{tabularx}
 
 % -------------------------------------------------------------
+% Controle de posicionamento de floats
+% -------------------------------------------------------------
+% \FloatBarrier automatico a cada \section: impede que uma figura/tabela
+% declarada em uma secao "vaze" para a secao seguinte. Para barreiras
+% entre subsecoes, use \FloatBarrier manualmente onde necessario.
+\usepackage[section]{placeins}
+
+% Torna o LaTeX mais tolerante ao empurrar floats: permite ate 90% da
+% pagina com float no topo/rodape e apenas 5% de texto minimo (default
+% 70/30/20), o que evita floats "presos" no fim de secoes longas.
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.90}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.70}
+
+% Evita que o LaTeX estique verticalmente paginas parciais (deixadas por
+% floats grandes). Melhor: alinha o texto pelo topo e mantem o espaco
+% vazio no rodape sem distorcer o entrelinhamento.
+\raggedbottom
+
+% -------------------------------------------------------------
 % Utilitarios de layout: quebras em identificadores longos e colunas
 % -------------------------------------------------------------
 % \pathtt{...} renderiza como \texttt mas permite quebra de linha em

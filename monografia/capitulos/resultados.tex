@@ -12,9 +12,10 @@ A análise que se segue apoia-se nos casos de teste controlados enumerados na Se
 \centering
 \caption{Resultados observados nas duas PoC para os casos de teste controlados}
 \label{tab:resultados-testes}
-\renewcommand{\arraystretch}{1.3}
-\footnotesize
-\begin{tabular}{|L{4.0cm}|L{2.5cm}|L{2.7cm}|L{4.8cm}|}
+\renewcommand{\arraystretch}{1.05}
+\setlength{\tabcolsep}{4pt}
+\scriptsize
+\begin{tabular}{|L{4.0cm}|L{2.4cm}|L{2.6cm}|L{5.0cm}|}
 \hline
 \textbf{Caso de teste} & \textbf{Ferramenta / Gate} & \textbf{Comportamento observado} & \textbf{Justificativa} \\
 \hline
@@ -57,7 +58,15 @@ Todos os casos elencados resultaram em interrupção correta da esteira. Em nenh
 \section{Métricas Consolidadas}
 \label{sec:metricas-resultado}
 
-Retomando as métricas definidas na Seção~\ref{sec:metricas}, os principais achados foram:
+Retomando as métricas definidas na Seção~\ref{sec:metricas}, os principais achados foram, sintetizados também na Figura~\ref{fig:pipeline}:
+
+\begin{figure}[!htbp]
+    \caption{Execução bem-sucedida da esteira DevSecOps integrada no Git, demonstrando o encadeamento sequencial de estágios automatizados (\textit{Plan}, \textit{Checkov} e \textit{Apply}) e a viabilidade prática do modelo.}
+    \label{fig:pipeline}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Arquivos/figuras/Figura_DevSecOps_Pipeline_GitlabPipeline.png}
+    \fonte{Elaborado pelo autor}
+\end{figure}
 
 \begin{itemize}
     \item \textbf{Taxa de detecção precoce:} 100\% dos casos deliberadamente inseguros foram detectados antes de qualquer \texttt{terraform apply} ou \textit{deploy} em Kubernetes. Isso é possível porque a esteira executa as verificações contra o \texttt{plan} (não contra o estado aplicado) e contra o código-fonte.
@@ -68,13 +77,7 @@ Retomando as métricas definidas na Seção~\ref{sec:metricas}, os principais ac
     \item \textbf{Rastreabilidade:} cada alteração de infraestrutura carrega, no mesmo \textit{commit}, o código e as políticas em vigor -- é possível, olhando o histórico do repositório, identificar não apenas quem alterou o quê, mas também qual política autorizou ou bloqueou aquela alteração.
 \end{itemize}
 
-\begin{figure}[!ht]
-    \caption{Execução bem-sucedida da esteira DevSecOps integrada no Git, demonstrando o encadeamento sequencial de estágios automatizados (\textit{Plan}, \textit{Checkov} e \textit{Apply}) e a viabilidade prática do modelo.}
-    \label{fig:pipeline}
-    \centering
-    \includegraphics[width=0.8\textwidth]{Arquivos/figuras/Figura_DevSecOps_Pipeline_GitlabPipeline.png}
-    \fonte{Elaborado pelo autor}
-\end{figure}
+\FloatBarrier
 
 \subsection{Detecção de Segredos com GitGuardian e Gitleaks}
 
