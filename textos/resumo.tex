@@ -1,0 +1,31 @@
+% RESUMO
+\begin{resumo}
+Esta pesquisa investiga a integração de práticas de DevSecOps com Infraestrutura como Código (IaC), com o objetivo de propor e validar um modelo automatizado que promova a segurança e a conformidade contínua em ambientes de computação em nuvem. A problemática central fundamenta-se na crescente complexidade das infraestruturas modernas e na necessidade crítica de mitigar vulnerabilidades comuns, como configurações inseguras e vazamento de credenciais, que elevam significativamente os riscos e custos de violações de dados. Por meio de uma abordagem de segurança Shift-left, o trabalho propõe o deslocamento dos controles de segurança para as fases iniciais do ciclo de vida de desenvolvimento, transformando políticas de conformidade em código auditável e executável.
+
+A metodologia adotada caracteriza-se como uma pesquisa aplicada, de natureza descritiva e abordagem mista, culminando na construção de uma Prova de Conceito (PoC) baseada em um cenário real de infraestrutura na Amazon Web Services (AWS). O ecossistema tecnológico implementado utilizou o Terraform para o provisionamento declarativo e uma esteira de Integração Contínua (CI/CD) integrada a ferramentas líderes de mercado: GitGuardian para a detecção de segredos em tempo real, Checkov para análise estática de segurança (SAST) baseada no framework CIS Benchmarks, e Open Policy Agent (OPA) para a aplicação de regras de governança e FinOps via linguagem Rego.
+
+Os resultados obtidos demonstraram a alta eficácia do modelo proposto, que identificou com sucesso 99\% das falhas críticas inseridas propositalmente, como a exposição de portas SSH para a internet e a ausência de criptografia em baldes S3. A análise comparativa revelou um ganho expressivo de agilidade operacional, reduzindo o tempo médio de revisão de segurança de 20 minutos (processo manual) para menos de 30 segundos por meio da automação. Além disso, a implementação de Pre-commit Hooks e mecanismos de Fail-Fast provou ser uma barreira eficiente para impedir que códigos não conformes ou credenciais expostas chegassem ao ambiente de produção.
+
+Conclui-se que a convergência entre DevSecOps e IaC não apenas fortalece a postura de segurança da organização, mas também democratiza a responsabilidade pela segurança entre as equipes de desenvolvimento e operações. O modelo apresentou-se escalável e adaptável, demonstrando que a automação da segurança é um facilitador da agilidade do negócio, e não um gargalo. O estudo contribui para a área de Engenharia de Software ao fornecer diretrizes práticas para a construção de infraestruturas resilientes, auditáveis e em conformidade com as melhores práticas de governança e proteção de dados.
+
+ \textbf{Palavras-chave}: DevSecOps. Infraestrutura como Código (IaC). Automação. Segurança de Nuvem. Shift-left
+\end{resumo}
+
+\newpage
+
+
+\begin{resumo}[Abstract]
+ \begin{otherlanguage*}{english}
+  This research investigates the integration of DevSecOps practices with Infrastructure as Code (IaC), aiming to propose and validate an automated model that promotes security and continuous compliance in cloud computing environments. The central problem is based on the growing complexity of modern infrastructures and the critical need to mitigate common vulnerabilities, such as insecure configurations and credential leakage, which significantly increase the risks and costs of data breaches. Through a Shift-left security approach, the study proposes moving security controls to the early stages of the development lifecycle, transforming compliance policies into auditable and executable code.
+
+The adopted methodology is characterized as applied research, descriptive in nature, and following a mixed-method approach, culminating in the construction of a Proof of Concept (PoC) based on a real-world infrastructure scenario on Amazon Web Services (AWS). The implemented technological ecosystem used Terraform for declarative provisioning and a Continuous Integration (CI/CD) pipeline integrated with market-leading tools: GitGuardian for real-time secret detection, Checkov for static application security testing (SAST) based on the CIS Benchmarks framework, and Open Policy Agent (OPA) for enforcing governance and FinOps rules via the Rego language.
+
+The results demonstrated the high effectiveness of the proposed model, which successfully identified 99\% of the intentionally inserted critical failures, such as the exposure of SSH ports to the internet and the lack of encryption in S3 buckets. Comparative analysis revealed a significant gain in operational agility, reducing the average security review time from 20 minutes (manual process) to less than 30 seconds through automation. Furthermore, the implementation of Pre-commit Hooks and Fail-Fast mechanisms proved to be an efficient barrier to prevent non-compliant code or exposed credentials from reaching the production environment.
+
+The study concludes that the convergence between DevSecOps and IaC not only strengthens the organization's security posture but also democratizes security responsibility across development and operations teams. The model proved to be scalable and adaptable, demonstrating that security automation is a business agility enabler rather than a bottleneck. This research contributes to the Software Engineering field by providing practical guidelines for building resilient, auditable infrastructures in compliance with governance and data protection best practices.
+
+  \vspace{\onelineskip}
+  \noindent 
+  \textbf{Keywords}: DevSecOps. Infrastructure as Code (IaC). Automation. Cloud Security. Shift-left.
+ \end{otherlanguage*}
+\end{resumo}

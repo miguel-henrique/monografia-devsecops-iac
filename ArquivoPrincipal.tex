@@ -1,0 +1,71 @@
+\documentclass[12pt, openright,oneside,a4paper,english,brazil]{abntex2}
+
+\include{Arquivos/pacotes}
+\include{Dados}
+\selectlanguage{brazil}
+
+\begin{document}
+
+% CAPA
+\include{textos/preambulo/capa}
+
+% -------------------------------------------------
+% ELEMENTOS PRÉ-Textuais
+% Os nomes são auto-explicativos
+% -------------------------------------------------
+\include{textos/preambulo/DedicatoriaAgradecimentos}
+\include{textos/resumo}
+\include{textos/preambulo/ListaFigurasTabelas}
+\include{textos/listaSiglas}
+
+% ------------------------------------
+% SUMARIO
+% ------------------------------------
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+\pagenumbering{arabic}
+\pagestyle{plain} %%para incluir a numeração
+
+%-------------------------------------------------
+% CAPÍTULOS
+%-------------------------------------------------
+%Exemplos no Latex, comente a linha abaixo na hora de compilar a versão final
+
+%Capítulo 1 - Introdução - OK
+\include{capitulos/introducao}
+
+%Capítulo 2 - Revisão da Literatura - OK
+\include{capitulos/revisaoLiteratura}
+
+%Capítulo 3 - Metodologia - OK
+\include{capitulos/metodologia}
+
+%Capítulo 4 - Desenvolvimento e Implementação - OK
+\include{capitulos/desenvolvimentoImplementacao}
+
+%Capítulo 5 - Análise e Discussão de Resultados - OK
+\include{capitulos/resultados}
+
+%Capítulo 6 - Conclusão - OK
+\include{capitulos/conclusao}
+
+% ----------------------------------------------------------
+% ELEMENTOS PÓS-TEXTUAIS
+% ----------------------------------------------------------
+\bibliography{Referencias.bib}
+
+
+% ----------------------------------------------------------
+% APÊNDICES
+% ----------------------------------------------------------
+\postextual
+\appendix
+\begin{apendicesenv}
+
+\include{textos/apendices/apendiceB}
+
+\end{apendicesenv}
+
+
+\end{document}
