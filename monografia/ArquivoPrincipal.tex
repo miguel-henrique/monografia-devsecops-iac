@@ -6,11 +6,31 @@
 
 \begin{document}
 
-% CAPA
+% ------------------------------------------------------------------
+% NUMERACAO DE PAGINAS - ABNT NBR 14724:2011 (item 5.4)
+% ------------------------------------------------------------------
+% "Todas as folhas do trabalho, a partir da FOLHA DE ROSTO, devem ser
+%  contadas sequencialmente... A numeracao deve figurar, a partir da
+%  primeira folha da PARTE TEXTUAL, em algarismos arabicos, no canto
+%  SUPERIOR DIREITO da folha, a 2 cm da borda superior."
+%
+% Estrategia:
+%   1) \pagenumbering{arabic} desde a folha de rosto: o contador comeca
+%      em 1 na capa (a capa nao conta na ABNT, mas ajustamos abaixo).
+%   2) \pagestyle{empty} nos elementos pre-textuais: paginas contadas,
+%      mas SEM numero impresso.
+%   3) Na parte textual, \pagestyle{abntheadings}: numero visivel no
+%      canto superior direito, mantendo o valor do contador sequencial
+%      (a Introducao aparece com o numero real da folha, nao com "1").
+% ------------------------------------------------------------------
+\pagenumbering{arabic}
+\pagestyle{empty}
+
+% CAPA (a ABNT nao conta a capa; descontamos ao final da pre-textual)
 \include{textos/preambulo/capa}
 
 % -------------------------------------------------
-% ELEMENTOS PRÉ-Textuais
+% ELEMENTOS PRÉ-Textuais (contados mas sem numero visivel)
 % -------------------------------------------------
 \include{textos/preambulo/DedicatoriaAgradecimentos}
 \include{textos/resumo}
@@ -23,8 +43,16 @@
 \pdfbookmark[0]{\contentsname}{toc}
 \tableofcontents*
 \cleardoublepage
-\pagenumbering{arabic}
-\pagestyle{plain}
+
+% ------------------------------------------------------------------
+% PARTE TEXTUAL: numero visivel no canto superior direito (NBR 14724)
+% ------------------------------------------------------------------
+% Descontamos 1 do contador: capa nao entra na contagem ABNT, mas a
+% folha de rosto sim (folha 1). Como \pagenumbering iniciou na capa,
+% subtraimos 1 aqui para que a folha de rosto seja considerada folha 1.
+\addtocounter{page}{-1}
+\pagestyle{abntheadings}
+\aliaspagestyle{chapter}{abntchapterfirst}
 
 %-------------------------------------------------
 % CAPÍTULOS
